@@ -15,7 +15,7 @@ function signup() {
           />
         </div>
         <div className="bg-white rounded-r-lg">
-          <h3>INVOICEY</h3>
+          <h3 className="font-manrope text-4xl">INVOICEY</h3>
           <h4>Sign up</h4>
           <p>Let's get you started</p>
         </div>
