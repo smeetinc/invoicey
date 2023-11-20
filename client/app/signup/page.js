@@ -4,13 +4,17 @@ import authImg from "../assets/authImg.png";
 
 function signup() {
   return (
-    <div className="w-full bg-green-400 h-screen py-8">
-      <div className="flex mx-auto mt-8 w-2/4 items-center">
-        <div className="w-full h-100">
-          <Image src={authImg} alt="Picture of the author" />
+    <div className="w-full bg-accent h-fit py-8">
+      <div className="flex mx-auto mt-8 w-3/5">
+        <div className="w-full">
+          <Image
+            src={authImg}
+            className="h-full w-full"
+            alt="Picture of the author"
+          />
         </div>
-        <div className="bg-white rounded-r-lg p-4 w-full h-fit">
-          <h3>INVOICEY</h3>
+        <div className="bg-white rounded-r-lg p-4 w-full">
+          <h2 className="text-primary text-3xl">INVOICEY</h2>
           <h4 className="text-center">Sign up</h4>
           <p className="text-center">Let's get you started</p>
 
