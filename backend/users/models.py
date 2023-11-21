@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash as generate, check_password_hash as check_pass
 from flask_login import UserMixin
 from main import db, login_manager
 import datetime
@@ -26,6 +27,21 @@ class User(db.Model, BaseMixin, UserMixin):
     last_name = db.Column(db.String(50), nullable=False)
     business = db.relationship("Business", backref="business", lazy=True)
     created_on = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    password = db.Column(db.Text, nullable=False)
+
+    @staticmethod
+    def generate_hash(password: str) -> str:
+        """\
+            A class function that generate hashed based on the data
+            given
+        """
+        return generate(password)
+
+    def check_hash(self, hashed: str) -> bool:
+        """\
+            Checks if the hashed password match the instance password
+        """
+        return check_pass(hashed, self.password)
 
 class Business(db.Model, BaseMixin):
     __tablename__ = "business"
@@ -48,6 +64,7 @@ class Invoice(db.Model, BaseMixin):
     description = db.Column(db.Text)
     client_id = db.Column(db.Integer, db.ForeignKey('clients._id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users._id'))
-    amount = db.Column(db.Integer)
+    amount = db.Column(db.Float, nullable=False)
     has_paid = db.Column(db.Boolean, default=False)
+    due_date = db.Column(db.Date, nullable=False)
     created_on = db.Column(db.DateTime, default=datetime.datetime.utcnow)
