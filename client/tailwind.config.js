@@ -20,7 +20,7 @@ module.exports = {
         success: "#4CAF50",
       },
       fontFamily: {
-        inter: "'Inter', sans-serif",
+        clashDisplay: "'Clash Display', sans-serif",
         manrope: "'Manrope', sans-serif",
         poppins: "'Poppins', sans-serif",
       },
