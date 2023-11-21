@@ -7,7 +7,9 @@ from utils import Config
 login_manager = LoginManager()
 db = SQLAlchemy()
 cors = CORS()
-
+allowed_origins = [
+    "http://localhost:3000",
+]
 def create_app():
     """\
         A function that creates the application instance
@@ -16,12 +18,16 @@ def create_app():
     app.config.from_object(Config)
 
     db.init_app(app)
-    cors.init_app(app, origins=["http://localhost:3000"], supports_credentials=True)
+    cors.init_app(app, origins=allowed_origins, supports_credentials=True)
     login_manager.init_app(app)
 
+    from users import users
     from base import base
+    from api import api
 
     app.register_blueprint(base)
+    app.register_blueprint(api, url_prefix='/api/')
+    app.register_blueprint(users, url_prefix='/users/')
 
     return app
 
