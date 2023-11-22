@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import ClientRow from "./ClientRow";
-import { poppins } from "../layout";
+import { poppins } from "@/utils/fonts";
 import { Dialog } from "@headlessui/react";
 const AddClientModal = ({ isOpen, closeModal }) => {
   return (

@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { poppins } from "@/app/layout";
+import { poppins } from "@/utils/fonts";
 import Link from "next/link";
 
 const InvoiceRow = ({ color }) => {

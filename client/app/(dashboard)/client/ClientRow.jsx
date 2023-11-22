@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { poppins } from "@/app/layout";
+import { poppins } from "@/utils/fonts";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
 const DeleteModal = ({ isOpen, closeModal }) => {
@@ -339,10 +339,9 @@ const ClientRow = ({ color }) => {
               </button>
             </div>
           </div>
+          <EditModal isOpen={showEditModal} closeModal={closeEditModal} />
+          <DeleteModal isOpen={showDeleteModal} closeModal={closeDeleteModal} />
         </td>
-
-        <EditModal isOpen={showEditModal} closeModal={closeEditModal} />
-        <DeleteModal isOpen={showDeleteModal} closeModal={closeDeleteModal} />
       </tr>
     </>
   );

@@ -1,5 +1,5 @@
 import React from "react";
-import { poppins } from "../layout";
+import { poppins } from "@/utils/fonts";
 import ClientRow from "./ClientRow";
 import ClientTable from "./ClientTable";
 
