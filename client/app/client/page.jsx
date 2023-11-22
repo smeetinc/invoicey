@@ -1,5 +1,6 @@
 import React from "react";
 import { poppins } from "../layout";
+import ClientRow from "./ClientRow";
 export const metadata = {
   title: "Clients",
   description: "This is the clients page",
@@ -22,11 +23,11 @@ const Client = () => {
             Add Client
           </button>
         </div>
-        <table className="w-[40%] overflow-hidden max-w-xl rounded-md border border-grey  mb-8  ">
+        <table className="w-full overflow-auto max-w-7xl px-1 rounded-md border border-grey  mb-8  ">
           <thead>
-            <tr>
-              <th>
-                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px] mr-10 py-4 pl-4 ">
+            <tr className="">
+              <th className=" w-1/6">
+                <div className="flex text-centerx   pl-4  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 whitespace-nowrap">
                   <span>Client ID</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -56,22 +57,22 @@ const Client = () => {
               </th>
 
               <th>
-                <div className="flex   items-center gap-2 text-dark font-bold text-base  tracking-[0.32px] mr-10 py-4 pl-4 ">
+                <div className="flex   items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
                   <span>Name</span>
                 </div>
               </th>
               <th>
-                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px] mr-10 py-4 pl-4 ">
+                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
                   <span>Email Address</span>
                 </div>
               </th>
               <th>
-                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px] mr-10 py-4 pl-4 ">
+                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
                   <span>Phone Number</span>
                 </div>
               </th>
               <th>
-                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px] mr-10 py-4 pl-4 ">
+                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
                   <span>Birthday</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +101,7 @@ const Client = () => {
                 </div>
               </th>
               <th>
-                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px] mr-10 py-4 pl-4 ">
+                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
                   <span>Gender</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -129,247 +130,17 @@ const Client = () => {
                 </div>
               </th>
               <th>
-                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px] mr-10 py-4 pl-4 ">
+                <div className="flex pr-2  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
                   <span>Action</span>
                 </div>
               </th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-collapse border border-grey">
-              <td>
-                <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center">
-                  <span>EP2347</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <span>Yusuf Ibrahim</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <span>Yusuf@gmail.com</span>
-                </div>
-              </td>
-              <td>
-                <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center ">
-                  <span>+2348167435627</span>
-                </div>
-              </td>
-              <td>
-                <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] text-center mr-10 py-4 pl-4 ">
-                  <span>23/06/1889</span>
-                </div>
-              </td>
-              <td>
-                <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center ">
-                  <span>Female</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="33"
-                    height="33"
-                    viewBox="0 0 33 33"
-                    fill="none"
-                  >
-                    <rect
-                      x="0.455292"
-                      width="32.1304"
-                      height="32.1304"
-                      rx="8.03261"
-                      fill="#CCCCCC"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="16.0654"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="8.06543"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="24.0654"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </div>
-              </td>
-            </tr>
-            <tr className="border-collapse border border-grey">
-              <td>
-                <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center">
-                  <span>EP2347</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <span>Yusuf Ibrahim</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <span>Yusuf@gmail.com</span>
-                </div>
-              </td>
-              <td>
-                <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center ">
-                  <span>+2348167435627</span>
-                </div>
-              </td>
-              <td>
-                <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] text-center mr-10 py-4 pl-4 ">
-                  <span>23/06/1889</span>
-                </div>
-              </td>
-              <td>
-                <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center ">
-                  <span>Female</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="33"
-                    height="33"
-                    viewBox="0 0 33 33"
-                    fill="none"
-                  >
-                    <rect
-                      x="0.455292"
-                      width="32.1304"
-                      height="32.1304"
-                      rx="8.03261"
-                      fill="#CCCCCC"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="16.0654"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="8.06543"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="24.0654"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </div>
-              </td>
-            </tr>
-            <tr className="border-collapse border border-grey">
-              <td>
-                <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center">
-                  <span>EP2347</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <span>Yusuf Ibrahim</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <span>Yusuf@gmail.com</span>
-                </div>
-              </td>
-              <td>
-                <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center ">
-                  <span>+2348167435627</span>
-                </div>
-              </td>
-              <td>
-                <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] text-center mr-10 py-4 pl-4 ">
-                  <span>23/06/1889</span>
-                </div>
-              </td>
-              <td>
-                <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center ">
-                  <span>Female</span>
-                </div>
-              </td>
-              <td>
-                <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 ">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="33"
-                    height="33"
-                    viewBox="0 0 33 33"
-                    fill="none"
-                  >
-                    <rect
-                      x="0.455292"
-                      width="32.1304"
-                      height="32.1304"
-                      rx="8.03261"
-                      fill="#CCCCCC"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="16.0654"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="8.06543"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                    <circle
-                      cx="16.5205"
-                      cy="24.0654"
-                      r="1"
-                      stroke="#333333"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </div>
-              </td>
-            </tr>
+            <ClientRow color={true} />
+            <ClientRow />
+            <ClientRow color={true} />
+            <ClientRow />
           </tbody>
         </table>
         <div className="flex border border-grey px-4 w-fit rounded-md">
