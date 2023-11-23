@@ -1,5 +1,5 @@
 import React from "react";
-import Logo from "../assets/rafiki.png";
+
 import Image from "next/image";
 
 function resetmail() {
