@@ -1,5 +1,5 @@
 import React from 'react'
-import GatewayComponent from './paymentGateway/gatewayPage'
+import GatewayComponent from './gatewayPage'
 
 export default function page() {
   return (

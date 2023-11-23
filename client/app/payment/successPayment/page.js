@@ -1,10 +1,10 @@
 import React from 'react'
-import GatewayComponent from './paymentGateway/gatewayPage'
+import PaidComponent from './paymentSuccess'
 
 export default function page() {
   return (
     <div>
-      <GatewayComponent />
+      <PaidComponent />
     </div>
   )
 }
