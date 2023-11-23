@@ -4,24 +4,30 @@ import Image from "next/image";
 import { LuArrowUpDown } from "react-icons/lu";
 import "./table.css";
 
-function dashboard() {
+function overview() {
   let entries = [
     [
       {
         id: 1,
         name: "john",
+        status: "paid",
+        style: "bg-success",
       },
     ],
     [
       {
         id: 2,
         name: "john",
+        status: "pending",
+        style: "bg-warning",
       },
     ],
     [
       {
         id: 3,
         name: "john",
+        status: "unpaid",
+        style: "bg-error",
       },
     ],
     [
@@ -94,7 +100,7 @@ function dashboard() {
   let Total = entries.length;
   console.log(Total);
   console.log(entries[3][0].id);
-  let page = 1;
+  let page = 3;
   let per_page = 5;
   let start = (page - 1) * per_page;
   let end = Math.min(start + per_page, Total);
@@ -126,7 +132,7 @@ function dashboard() {
           </div>
           <div className="bg-primary text-white py-10 px-8 rounded-lg text-center">
             <h3>No of Overdue payment</h3>
-            <p className="font-bold text-center">{10}</p>
+            <p className="font-bold text-center text-accent">{10}</p>
           </div>
           <div className="bg-accent text-primary py-10 px-8 rounded-lg text-center">
             <h3>Total Amount Received</h3>
@@ -190,27 +196,19 @@ function dashboard() {
                     <td>{item[0].id}</td>
                     <td>{item[0].id}</td>
                     <td>{item[0].id}</td>
-                    <td>{item[0].id}</td>
+                    <td>
+                      <div
+                        className={
+                          "text-white w-fit text-center px-4 py-2 rounded-md my-2" +
+                          " " +
+                          item[0].style
+                        }
+                      >
+                        {item[0].id}
+                      </div>
+                    </td>
                   </tr>
                 ))}
-                <tr>
-                  <td>kkkkk</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>kkkkk</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
                 <tr>
                   <td>kkkkk</td>
                   <td></td>
@@ -224,13 +222,26 @@ function dashboard() {
             </table>
           </div>
           <div className="flex my-2">
-            {<button
-              type="button"
-              className="rounded-l-md border-2 py-2 px-3"
-            >
-              Previous
-            </button>}
-            <button className="rounded-r-lg border-2 px-3 py-2">Next</button>
+            {end < 6 ? (
+              <button
+                type="button"
+                className="rounded-l-md border-2 py-2 px-3"
+                disabled
+              >
+                Previous
+              </button>
+            ) : (
+              <button type="button" className="rounded-l-md border-2 py-2 px-3">
+                Previous
+              </button>
+            )}
+            {end == Total ? (
+              <button className="rounded-r-lg border-2 px-3 py-2" disabled>
+                Next
+              </button>
+            ) : (
+              <button className="rounded-r-lg border-2 px-3 py-2">Next</button>
+            )}
           </div>
         </div>
       </div>
@@ -239,4 +250,4 @@ function dashboard() {
   );
 }
 
-export default dashboard;
+export default overview;
