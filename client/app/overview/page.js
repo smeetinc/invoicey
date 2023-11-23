@@ -1,5 +1,4 @@
 import React from "react";
-import Mask from "../assets/Mask.png";
 import Image from "next/image";
 import { LuArrowUpDown } from "react-icons/lu";
 import "./table.css";
@@ -115,7 +114,13 @@ function overview() {
       {/*----Main screen for overview here ----*/}
       <div className="w-full px-8">
         <div className="flex flex-row-reverse gap-1 border-b-2 w-full py-4">
-          <Image src={Mask} alt="avatar" className="mr-4" />
+          <Image
+            src="/assets/Mask.png"
+            width={32}
+            height={32}
+            alt="avatar"
+            className="mr-4"
+          />
         </div>
         <div className="px-4 py-2 flex justify-between">
           <h2>Overview</h2>

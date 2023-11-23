@@ -13,7 +13,9 @@ function resetmail() {
       <div className="bg-primary h-full py-auto flex items-center">
         <div className="bg-accent my-auto mx-auto w-1/2 text-center rounded-2xl">
           <Image
-            src={Logo}
+            src="/assets/rafiki.png"
+            width={242.33}
+            height={180.57}
             className="mx-auto mt-2 mb-4"
             alt="A lady reading some documents"
           />

@@ -1,5 +1,5 @@
 import React from "react";
-import Contract from "../assets/contract.png";
+
 import Image from "next/image";
 
 function complete() {
@@ -13,8 +13,10 @@ function complete() {
       <div className="bg-primary h-full py-auto flex items-center">
         <div className="bg-accent my-auto mx-auto w-1/2 text-center rounded-2xl">
           <Image
-            src={Contract}
+            src="/assets/contract.png"
             className="mx-auto mt-2 mb-4"
+            width={242.33}
+            height={180.57}
             alt="A signed contract"
           />
           <div>

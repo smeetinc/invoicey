@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useState } from "react";
-import authImg from "../assets/authImg.png";
+
 import { FaRegEyeSlash } from "react-icons/fa";
 import { TbEyeSearch } from "react-icons/tb";
 
@@ -12,12 +12,13 @@ function signup() {
       <div className="flex mx-auto w-3/5 shadow-sm">
         <div className="w-full hidden lg:flex">
           <Image
-            src={authImg}
+            src="/assets/authImg.png"
+            width={500}
+            height={500}
             className="h-full w-full"
             alt="A lady reading some documents"
           />
         </div>
-<<<<<<< HEAD
         <div className="bg-white rounded-lg lg:rounded-r-lg p-4 w-full">
           <h2 className="text-primary text-3xl font-clashDisplay leading-10 font-bold">
             INVOICEY
@@ -129,12 +130,6 @@ function signup() {
               </small>
             </div>
           </div>
-=======
-        <div className="bg-white rounded-r-lg">
-          <h3 className="font-manrope text-4xl">INVOICEY</h3>
-          <h4>Sign up</h4>
-          <p>Let's get you started</p>
->>>>>>> main
         </div>
       </div>
     </div>
