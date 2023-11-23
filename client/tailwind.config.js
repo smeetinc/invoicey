@@ -15,7 +15,7 @@ module.exports = {
         accent: "#9FE870",
         grey: "#666666",
         warning: "#FFC107",
-        grey: "#CCCCCC",
+        lightGrey: "#CCCCCC",
         error: "#A8200D",
         success: "#4CAF50",
         secondary: "#9FE870",

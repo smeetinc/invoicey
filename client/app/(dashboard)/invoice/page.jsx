@@ -1,11 +1,29 @@
 "use client";
-import InvoiceRow from "../client/[id]/InvoiceRow";
+import InvoiceRow from "./InvoiceRow";
 import { poppins } from "@/utils/fonts";
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { invoiceSchema } from "@/utils/schemas";
 const AddInvoiceModal = ({ isOpen, closeModal }) => {
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+    reset,
+  } = useForm({ resolver: zodResolver(invoiceSchema) });
+  const submitHandler = (data) => {
+    console.log(data);
+    reset();
+  };
+  const resetAndCloseModal = () => {
+    reset();
+    closeModal();
+  };
   return (
-    <Dialog open={isOpen} onClose={closeModal}>
+    <Dialog open={isOpen} onClose={resetAndCloseModal}>
       <div
         className="fixed z-50 inset-0 bg-black/30 w-screen h-screen grid place-items-center"
         aria-hidden="true"
@@ -38,7 +56,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                 directly.
               </p>
             </div>
-            <button className="text-grey" onClick={closeModal}>
+            <button className="text-grey" onClick={resetAndCloseModal}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -56,7 +74,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
               </svg>
             </button>
           </Dialog.Title>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleSubmit(submitHandler)}>
             <div className="grid grid-cols-2 gap-8  mb-8">
               <div className="flex flex-col gap-2  ">
                 <label
@@ -69,7 +87,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                   placeholder="Toyosi Lawal"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
                   id="name"
-                  name="name"
+                  {...register("clientName", { required: true })}
                 >
                   <option
                     value=""
@@ -80,7 +98,14 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                   >
                     Select Client Name
                   </option>
+                  <option value="gideon">Gideon</option>
                 </select>
+
+                {errors.clientName && (
+                  <p className="text-error font-normal text-base">
+                    {errors.clientName?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
@@ -94,8 +119,16 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                   type="date"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
                   id="dueDate"
-                  name="dueDate"
+                  {...register("dueDate", {
+                    required: true,
+                    valueAsDate: true,
+                  })}
                 />
+                {errors.dueDate && (
+                  <p className="text-error font-normal text-base">
+                    {errors.dueDate?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
@@ -107,10 +140,18 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                 <input
                   placeholder="#200,000.00"
                   type="number"
-                  name="amount"
+                  {...register("amount", {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
                   id="amount"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
                 />
+                {errors.amount && (
+                  <p className="text-error font-normal text-base">
+                    {errors.amount?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
@@ -122,9 +163,14 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                 <input
                   placeholder="Wedding Coverage"
                   id="paymentFor"
-                  name="paymentFor"
+                  {...register("paymentFor", { required: true, minLength: 10 })}
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
                 />
+                {errors.paymentFor && (
+                  <p className="text-error font-normal text-base">
+                    {errors.paymentFor?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2 col-span-2   ">
                 <label
@@ -136,16 +182,24 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                 <textarea
                   placeholder="This is the payment for the complete prewedding & video coverage of your wedding."
                   id="description"
-                  name="description"
+                  {...register("description", {
+                    required: true,
+                    minLength: 30,
+                  })}
                   className="px-4 py-3 rounded-lg w-full border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal min-h-[100px]"
                 />
+                {errors.description && (
+                  <p className="text-error font-normal text-base">
+                    {errors.description?.message}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 mt-8">
               <button
                 type="submit"
                 className="bg-transparent py-3 px-5 rounded-lg border border-[#D0D5DD] text-[#344054] flex justify-center items-center text-base font-medium leading-6"
-                onClick={closeModal}
+                onClick={resetAndCloseModal}
               >
                 {" "}
                 Cancel
