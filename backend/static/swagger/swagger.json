@@ -1,0 +1,278 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"title": "Invoicey backend API",
+		"description": "Api that connects the inner workings of Invoicey application",
+		"version": "1.0.0",
+	},
+	"tags": [
+		{
+			"name": "Users",
+			"description": "The user application endpoints",
+		},
+		{
+			"name": "Clients",
+			"description": "The clients application endpoints"
+		},
+		{
+			"name": "Invoices",
+			"description": "The invoices application endpoints"
+		}
+	],
+	"basePath": "/",
+	"schemes": [
+		"http",
+		"https",
+	],
+	"consumes": [
+		"application/json",
+	],
+	"produces": [
+		"application/json",
+	],
+	"paths": {
+		"/": {
+			"get": {
+				"summary": "Returns a csrf_token for all post requests",
+				"produces":[
+					"application/json",
+				],
+				"parameters": [
+					{
+						"name": "is-from-site",
+						"in": "header",
+						"required": true,
+						"type": "string",
+						"description": "Required header to validate"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+							}
+						}
+					}
+				},
+			}
+		},
+		"/api/authenticate/": {
+			"post": {			
+				"summary": "Accepts User JSON Auth Data",
+				"produces": [
+					"application/json",
+				],
+				"consumes": [
+					"application/json",
+				],
+				"tags": [
+					"Users"
+				],
+				"parameters": [
+					{
+						"name": "",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"email": {
+								"type": "string",
+								"example": "email.com",
+							},
+							"password": {
+								"type": "string",
+								"example": "password",
+							}
+						}
+					},
+					{
+						"name": "X-CSRFToken",
+						"in": "header",
+						"required": true,
+						"type": "string",
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+
+							}
+						}
+					}
+				}
+			}
+		},
+		"/overview-data/": {
+			"get": {
+				
+			}
+		},
+		"/register-user/": {
+			"post": {
+				"summary": "Creating User Application",
+				"produces": [
+					"application/json"	
+				],
+				"tags": [
+					"Users"
+				],
+				"parameters":[
+					{
+						"name": "body",
+						"in": "body",
+						"type": "object",
+						"required": true,
+						"description": "register-user data",
+						"schema": {
+							"type": "object",
+							"properties": {
+								"email": {
+									"type": "string",
+									"example": "example@email.com"
+								},
+								"name": {
+									"type": "string",
+									"example": "John. Doe"
+								},
+								"password": {
+									"type": "string",
+									"example": "password"
+								},
+								"busi_nm": {
+									"type": "string",
+									"example": "Business Name"
+								},
+								"birth_date": {
+									"type": "string",
+									"example": "dd/mm/yyyy",
+								}
+
+							}
+						},
+					}
+				],
+				"responses": {
+					"200":{
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"items": {
+										"type": "object",
+										"properties": {
+											"created": {
+												"type":"boolean"
+											},
+											"message": {
+												"type":"string"
+											},
+											"status": {
+												"type":"string"
+											},
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"consumes": [
+					"application/json"
+				]
+			}
+		},
+		"/all-clients/": {
+			"get": {
+				"summary": "Returns all-clients data",
+				"produces": [
+					"application/json",
+				],
+				"tags": [
+					"Clients"	
+				],
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"required": true,
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"example": "EP{id}",
+													},
+													"name": {
+														"type": "string",
+														"example": "Test User Name",
+													},
+													"email": {
+														"type": "string",
+														"example": "email@email.com"
+													},
+													"phone": {
+														"type": "string",
+														"example": "9000000000",
+														"length": 10
+													},
+													"birth_date": {
+														"type": "string",
+														"example": "dd/mm/yy",
+													},
+													"gender": {
+														"type": "string",
+														"example": "M",
+														"length": 1,
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/user/password-reset/": {
+			"post": {
+				"description": "Posts Json Data",
+				"tags": [
+					"Users",
+				]
+			}
+		},
+		"/invoices-data/": {
+			"get": {
+				"description": "Gets Invoices Data",
+				"tags": [
+					"Invoices",
+				],
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"required": true,
+					}
+				]
+			}
+		}
+	}
+}

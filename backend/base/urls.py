@@ -6,8 +6,9 @@ from base import base
 
 @base.route('/')
 def index():
-    is_from_site = request.headers.get('is_from_site')
-    if is_from_site:
+    is_from_site = request.headers.get('is-from-site')
+    print(is_from_site)
+    if is_from_site and is_from_site == "x-token-value":
         csrf = {
             "csrf_token": generate_csrf()
         }

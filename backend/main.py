@@ -1,4 +1,5 @@
 from flask_wtf.csrf import CSRFProtect
+from flask_swagger_ui import get_swaggerui_blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -9,11 +10,13 @@ from utils import Config, DevelopmentConfig
 
 
 
-
-allowed_origins = [
-    "http://localhost:3000",
+SWAGGER_URL = '/api-docs'
+API_URL = '/static/swagger/swagger.json'
+ALLOWED_ORGINS = [
+    "http://localhost:3000/",
+    "http://localhost:5000/",
+    "https://invoicey-one.vercel.app",
 ]
-
 
 
 
@@ -22,6 +25,13 @@ db = SQLAlchemy()
 cors = CORS()
 csrf = CSRFProtect()
 mail = Mail()
+swagger = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "Invoicey Application API"
+    }
+)
 
 def create_app():
     """\
@@ -33,7 +43,7 @@ def create_app():
     db.init_app(app)
     csrf.init_app(app)
     mail.init_app(app)
-    cors.init_app(app, origins=allowed_origins, supports_credentials=True)
+    cors.init_app(app, origins=ALLOWED_ORGINS, supports_credentials=True)
     login_manager.init_app(app)
 
     from users import users
@@ -41,8 +51,10 @@ def create_app():
     from api import api
 
     app.register_blueprint(base)
+    app.register_blueprint(swagger)
     app.register_blueprint(api, url_prefix='/api/')
     app.register_blueprint(users, url_prefix='/users/')
+
 
     return app
 
