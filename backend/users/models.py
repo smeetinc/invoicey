@@ -1,14 +1,9 @@
 from werkzeug.security import generate_password_hash as generate, check_password_hash as check_pass
 from flask_login import UserMixin
 from flask import current_app
-from main import db, login_manager
+from main import db
 import datetime
 import jwt
-
-@login_manager.user_loader
-def load_user(id):
-    user = User.query.get(int(id))
-    return user
 
 class BaseMixin:
     _id = db.Column(db.Integer, primary_key=True, unique=True)
@@ -22,7 +17,7 @@ class BaseMixin:
     def set_id(self, _id):
         self._id = _id
 
-class User(db.Model, BaseMixin, UserMixin):
+class User(db.Model, BaseMixin):
     __tablename__ = "users"
     first_name = db.Column(db.String(50), nullable=False)
     name = db.Column(db.String(150), nullable=False)
@@ -59,7 +54,7 @@ class User(db.Model, BaseMixin, UserMixin):
         """\
             checks if the given invoice id was created by the user
         """
-        return (_id in [invoice.pk for client in self.invoices])
+        return (_id in [invoice.pk for invoice in self.invoices])
 
     @staticmethod
     def create_jwt_token(**kwargs) -> str:

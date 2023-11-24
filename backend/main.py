@@ -1,4 +1,4 @@
-from flask_wtf.csrf import CSRFProtect
+from flask_httpauth import HTTPTokenAuth
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -6,7 +6,6 @@ from flask_mail import Mail
 from flask_cors import CORS
 from flask import Flask
 from utils import Config, DevelopmentConfig
-
 
 
 
@@ -22,11 +21,10 @@ ALLOWED_ORGINS = [
 ]
 
 
-
+auth = HTTPTokenAuth(scheme="Bearer")
 login_manager = LoginManager()
 db = SQLAlchemy()
 cors = CORS()
-csrf = CSRFProtect()
 mail = Mail()
 swagger = get_swaggerui_blueprint(
     SWAGGER_URL,
@@ -45,7 +43,6 @@ def create_app():
     app.config.from_object(DevelopmentConfig)
 
     db.init_app(app)
-    csrf.init_app(app)
     mail.init_app(app)
     cors.init_app(app, origins="*", supports_credentials=True,
                   methods=['POST', 'GET', 'DELETE', 'PUT'])
@@ -66,3 +63,17 @@ def create_app():
 app = create_app()
 
 mail = mail
+
+from users.models import User
+
+@auth.verify_token
+def verify_token(token: str):
+    """
+        An function that validates auth token
+    """
+    token = User.decode_jwt_token(token)
+    _id = token.get("id")
+    if _id:
+        user = User.query.get(_id)
+        if user:
+            return User

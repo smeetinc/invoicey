@@ -1,17 +1,17 @@
 from flask.views import MethodView, View
-from flask_login import login_required, current_user
 from flask import request, current_app, url_for, request
-from users.models import Client
+from users.models import Client, User
+from main import auth
 import datetime
 
 class MultipleClientDataAPIView(View):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def dispatch_request(self):
 		page = request.args.get('page',1, type=int)
 		per_page = current_app.config.get('PER_PAGE')
-		user = current_user._get_current_object()
+		user = auth.current_user()
 		pclients = Client.query.filter_by(user=user).paginate(page=page, per_page=per_page)
 		data = {
 			"clients": [
@@ -32,7 +32,7 @@ class MultipleClientDataAPIView(View):
 
 class ClientDataAPIView(MethodView):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def get(self):
 		client_id = request.args.get("name")
@@ -102,7 +102,7 @@ class ClientDataAPIView(MethodView):
 
 class InvoiceDataAPIView(MethodView):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def get(self):
 		name = request.args.get('trsc_id')
@@ -118,7 +118,7 @@ class InvoiceDataAPIView(MethodView):
 
 class MultipleInvoiceDataAPIView(View):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def dispatch_request(self, client_name):
 		client = Client.query.filter_by("name").first()
