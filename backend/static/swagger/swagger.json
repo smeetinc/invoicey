@@ -1,5 +1,5 @@
 {
-	"swagger": "2.0",
+	"openapi": "3.0.2",
 	"info": {
 		"title": "Invoicey backend API",
 		"description": "Api that connects the inner workings of Invoicey application",
@@ -24,6 +24,11 @@
 		"http",
 		"https",
 	],
+	"security": [
+		{
+			"sessionAuth": []
+		}
+	],
 	"consumes": [
 		"application/json",
 	],
@@ -36,6 +41,8 @@
 				"summary": "Returns a csrf_token for all post requests",
 				"produces":[
 					"application/json",
+				],
+				"security": [
 				],
 				"parameters": [
 					{
@@ -68,6 +75,8 @@
 				],
 				"tags": [
 					"Users"
+				],
+				"security": [
 				],
 				"parameters": [
 					{
@@ -116,12 +125,17 @@
 				"produces": [
 					"application/json"	
 				],
+				"consumes": [
+					"application/json"	
+				],
 				"tags": [
 					"Users"
 				],
+				"security": [
+				],
 				"parameters":[
 					{
-						"name": "body",
+						"name": "json",
 						"in": "body",
 						"type": "object",
 						"required": true,
@@ -178,9 +192,6 @@
 						}
 					}
 				},
-				"consumes": [
-					"application/json"
-				]
 			}
 		},
 		"/api/all-clients/": {
@@ -249,14 +260,6 @@
 				}
 			}
 		},
-		"/api/user/password-reset/": {
-			"post": {
-				"description": "Posts Json Data",
-				"tags": [
-					"Users",
-				]
-			}
-		},
 		"/api/invoices-data/": {
 			"get": {
 				"description": "Gets Invoices Data",
@@ -271,6 +274,117 @@
 					}
 				]
 			}
+		},
+		"/api/users/password-reset/": {
+			"post": {
+				"description": "Activate the token passed int",
+				"tags": [
+					"Users"
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"email": {
+								"type": "string",
+								"example": "example@email.com"
+							}
+						}
+					},
+					{
+						"name": "X-CSRFToken",
+						"in": "header",
+						"required": true,
+						"type": "string",
+					}
+				],
+				"security": [
+				],
+			}
+		},
+		"/api/users/activate/{token}/": {
+			"post": {
+				"description": "Activate the token passed int",
+				"tags": [
+					"Users"
+				],
+				"parameters": [
+					{
+						"name": "token",
+						"in": "path",
+						"required": true,
+					},
+					{
+						"name": "X-CSRFToken",
+						"in": "header",
+						"required": true,
+						"type": "string",
+					}
+				],
+				"security": [
+				],
+			}
+		},
+		"/api/clients/": {
+			"post": {
+				"description": "Creates the clients",
+				"tags": [
+					"Clients"
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"example": "John. Client"
+							},
+							"email": {
+								"type": "string",
+								"example": "John. Client"
+							},
+							"birth_date": {
+								"type": "string",
+								"example": "John. Client"
+							},
+							"phone": {
+								"type": "string",
+								"example": "+234790989087"
+							},
+						}
+					},
+					{
+						"name": "X-CSRFToken",
+						"in": "header",
+						"required": true,
+						"type": "string",
+					}
+				]
+			},
+			"get": {
+				"description": "Get the a single client with the given id",
+				"tags": [
+					"Clients"
+				],
+				"parameters": [
+					{
+						"name": "_id",
+						"in": "query",
+						"required": true,
+						"type": "integer",
+					},
+				],
+				"security": {
+					"sessionAuth": []
+				},
+
+			}
 		}
-	}
+	},
 }

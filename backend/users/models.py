@@ -28,7 +28,7 @@ class User(db.Model, BaseMixin, UserMixin):
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    business = db.relationship("Business", backref="user", uselist=False)
+    business = db.relationship("Business", backref="merchant", uselist=False)
     created_on = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     clients = db.relationship("Client", backref='user', lazy=True)
     invoices = db.relationship("Invoice", backref="user", lazy=True)
@@ -43,11 +43,11 @@ class User(db.Model, BaseMixin, UserMixin):
         """
         return generate(password)
 
-    def check_hash(self, hashed: str) -> bool:
+    def check_hash(self, password: str) -> bool:
         """\
             Checks if the hashed password match the instance password
         """
-        return check_pass(hashed, self.password)
+        return check_pass(self.password, password)
 
     def client_created_by_me(self, _id: int):
         """\
@@ -83,7 +83,7 @@ class Business(db.Model, BaseMixin):
     product = db.Column(db.String(100))
     description = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('users._id'))
-    invoices = db.relationship("Invoice", backref="user", lazy=True)
+    invoices = db.relationship("Invoice", backref="business", lazy=True)
 
 class Client(db.Model, BaseMixin):
     __tablename__ = "clients"

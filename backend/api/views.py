@@ -61,10 +61,15 @@ class ClientDataAPIView(MethodView):
 		}
 		json = request.json
 		if json:
+			user = User.query.filter_by(email=json.get('email')).first()
+			if user:
+				client_msg['message'] = "Client with that email already exists"
+				client_msg['created'] = True
+				return client_msg
 			name = json.get('name')
 			email = json.get('email')
 			birth_date = json.get('birth_date')
-			birth_date = datetime.datetime.strptime('')
+			birth_date = datetime.datetime.strptime('%d/%m/%Y')
 			phone = json.get('phone')
 			gender = json.get('gender')
 			client = Client(name=name, email=email,

@@ -1,9 +1,11 @@
-from flask import jsonify, make_response, url_for, request, current_app
+from flask import jsonify, make_response, url_for, request, current_app, render_template as render
 from flask_login import current_user, login_user, logout_user, login_required
 from users.models import User, Invoice, Client, Business
+from utils import smtnb, send_mail_text, send_mail
 from main import db
 from .views import ClientDataAPIView, MultipleClientDataAPIView
 from . import api
+import jwt
 import datetime
 
 
@@ -14,7 +16,8 @@ api.add_url_rule('/all-client-data/', view_func=MultipleClientDataAPIView.as_vie
 
 @api.post('/authenticate/')
 def authenticate():
-	json = request.json
+	print(request.is_json)
+	json = request.get_json()
 	auth_message = {
 		"valid": False,
 		"message": 'User Not Found',
@@ -27,9 +30,10 @@ def authenticate():
 		password = json.get('password')
 		remember = json.get('remember')
 		user = User.query.filter_by(email=email).first()
-		if user and user.check_pass(password):
+		print(user)
+		if user and user.check_hash(password):
 			if not user.is_deleted:
-				if user.is_activated:
+				if user.is_activate:
 					login_user(user, remember=remember)
 					auth_message['valid'] = True
 					auth_message['message'] = 'User logged in successfully'
@@ -42,9 +46,8 @@ def authenticate():
 				auth_message['level'] = "warning"
 				auth_message['data'] = bool(json)
 				return auth_message
-			auth_message['message'] = 'Invalid Credentials'
-			auth_message['level'] = 'warning'
-			return auth_message
+		auth_message['message'] = 'Invalid Credentials'
+		auth_message['level'] = 'warning'
 		return auth_message, 401
 	auth_message['data'] = bool(json)
 	auth_message['authenticated'] = current_user.is_authenticated
@@ -52,7 +55,7 @@ def authenticate():
 
 @api.post('/register-user/')
 def signup():
-	json = request.json
+	json = request.get_json()
 	register_message = {
 		'created': False,
 		'message': 'User Not Created',
@@ -68,23 +71,103 @@ def signup():
 			hashed = User.generate_hash(password)
 			first, last = name.split()
 			user = User(first_name=first, last_name=last, password=hashed, email=email, name=name)
-			business = Business(name="busi_nm", user=user)
+			business = Business(name="busi_nm", merchant=user)
 			db.session.add_all([user, business])
 			db.session.commit()
 			register_message['created'] = True
 			register_message['message'] = "User created please check your email for validation"
 			register_message['status'] = "success"
+			token = user.encode_id()
+			subject = "verify your email address"
+			message = render("mail/creation_verify.txt", token=token, user=user)
+			smtnb(subject, message, recipients=[email])
 			return register_message, 201
 		register_message['created'] = True
 		register_message['message'] = "User already exists"
 		return register_message
 	return register_message
 
+@api.post("/users/activate/<string:token>/")
+def activate_user(token: str):
+	try:
+		token = User.decode_jwt_token(token)
+		if token:
+			user = User.query.get(_id=token[_id])
+			if user:
+				user.is_activate = True
+				db.session.add(user)
+				db.session.commit()
+				return {
+					"message": "User account activated !",
+					"status": "success"
+				}
+			return {
+				"message": "Sorry an error occured",
+				"status": "success"
+			}
+		return {
+			"message": "Token was not specified",
+			"status": "error"
+		}
+	except jwt.ExpiredSignatureError:
+		return {
+			"message": "Token Expired",
+			"status": "error"
+		}
+	except jwt.InvalidTokenError:
+		return {
+			"message": "Tampered token invalid",
+			"status": "error"
+		}
+
 @api.post('/users/password-reset/')
 def reset_password():
-	return ''
+	json = request.get_json()
+	if json:
+		email = json.get("email")
+		user = User.query.filter_by(email=email).first()
+		if user and not user.is_deleted:
+			try:
+				token = user.encode_id()
+				if token:
+					subject = "Reset Password Token"
+					message = render("mail/creation_verify.txt", token=token, user=user)
+					smtnb(subject, message, recipients=[email])
+					return {
+						"status": "success",
+						"message": "Mail sent !",
+					}
 
+			except:
+				return {
+					"status": "error",
+					"message": "An error has occured"
+				}
+		return {
+			"status": "error",
+			"message": "No user found for that email address"
+		}
+	return {
+		"status": "error",
+		"message": "JSON data not received"
+	}
 
+@api.post('/verify_reset/<string:token>/<int:_id>')
+def verify_reset(token: str, _id: int):
+	user = User.query.get(_id)
+	data = {
+		"message": "Error with token provided",
+		"valid": False,
+		"changed": False
+	}
+	if user:
+		decoded = user.decode_jwt_token(token)
+		if decoded.get('id') == _id:
+			user.is_activate = True
+			db.session.add(user)
+			db.session.commit()
+			data['message'] = "Validated"
+			return data
 @api.get('/overview-data/')
 @login_required
 def overview():
@@ -169,9 +252,9 @@ def internal_error(e):
 		"code": e.code,
 	}, 502
 
-@api.app_errorhandler(400)
-def internal_error(e):
-	return {
-		"message": e.name,
-		"code": e.code,
-	}, 400
+# @api.app_errorhandler(400)
+# def internal_error(e):
+# 	return {
+# 		"message": e.name,
+# 		"code": e.code,
+# 	}, 400

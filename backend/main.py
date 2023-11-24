@@ -13,6 +13,7 @@ from utils import Config, DevelopmentConfig
 SWAGGER_URL = '/api-docs'
 API_URL = '/static/swagger/swagger.json'
 ALLOWED_ORGINS = [
+    "http://localhost:3000",
     "http://localhost:3000/",
     "http://localhost:5000/",
     "http://olatidejosepha.pythonanywhere.com/"
@@ -62,3 +63,5 @@ def create_app():
     return app
 
 app = create_app()
+
+mail = mail
