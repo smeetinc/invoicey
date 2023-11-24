@@ -1,5 +1,5 @@
 {
-	"openapi": "3.0.2",
+	"swagger": "2.0",
 	"info": {
 		"title": "Invoicey backend API",
 		"description": "Api that connects the inner workings of Invoicey application",
