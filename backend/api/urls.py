@@ -1,6 +1,7 @@
 from flask import jsonify, make_response, url_for, request, current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from users.models import User, Invoice, Client, Business
+from main import db
 from .views import ClientDataAPIView, MultipleClientDataAPIView
 from . import api
 import datetime
@@ -28,20 +29,26 @@ def authenticate():
 		user = User.query.filter_by(email=email).first()
 		if user and user.check_pass(password):
 			if not user.is_deleted:
-				login_user(user, remember=remember)
+				if user.is_activated:
+					login_user(user, remember=remember)
+					auth_message['valid'] = True
+					auth_message['message'] = 'User logged in successfully'
+					auth_message['level'] = 'success'
+					auth_message['authenticated'] = current_user.is_authenticated
+					auth_message['data'] = bool(json)
+					return auth_message
 				auth_message['valid'] = True
-				auth_message['message'] = 'User logged in successfully'
-				auth_message['level'] = 'success'
-				auth_message['authenticated'] = current_user.is_authenticated
+				auth_message['message'] = "Account is not activated please check your email to activate"
+				auth_message['level'] = "warning"
 				auth_message['data'] = bool(json)
 				return auth_message
 			auth_message['message'] = 'Invalid Credentials'
 			auth_message['level'] = 'warning'
 			return auth_message
-		return auth_message
+		return auth_message, 401
 	auth_message['data'] = bool(json)
 	auth_message['authenticated'] = current_user.is_authenticated
-	return auth_message
+	return auth_message, 401
 
 @api.post('/register-user/')
 def signup():
@@ -52,27 +59,25 @@ def signup():
 		"status": "error"
 	}
 	if json:
-		try:
-			user = User.query.get(email=json.get("email"))
-			if not user:
-				name = json.get("name")
-				email = json.get("email")
-				busi_nm = json.get("busi_name")
-				password = json.get("password")
-				hashed = User.generate(password)
-				first, last = name.split()
-				user = User(name=name, first_name=first, last_name=last, password=hashed)
-				business = Business(name="busi_nm", user=user)
-				db.session.add_all([user, business])
-				db.session.commit()
-				register_message['created'] = True
-				register_message['message'] = "User created please check your email for validation"
-				return register_message
+		user = User.query.filter_by(email=json.get("email")).first()
+		if not user:
+			name = json.get("name")
+			email = json.get("email")
+			busi_nm = json.get("busi_name")
+			password = json.get("password")
+			hashed = User.generate_hash(password)
+			first, last = name.split()
+			user = User(first_name=first, last_name=last, password=hashed, email=email, name=name)
+			business = Business(name="busi_nm", user=user)
+			db.session.add_all([user, business])
+			db.session.commit()
 			register_message['created'] = True
-			register_message['message'] = "User already exists"
-			return register_message
-		except:
-			pass
+			register_message['message'] = "User created please check your email for validation"
+			register_message['status'] = "success"
+			return register_message, 201
+		register_message['created'] = True
+		register_message['message'] = "User already exists"
+		return register_message
 	return register_message
 
 @api.post('/users/password-reset/')
@@ -127,3 +132,46 @@ def invoices():
 		"total": total,
 	}
 	return data
+
+
+@api.app_errorhandler(500)
+def internal_error(e):
+	return {
+		"message": e.name,
+		"code": e.code,
+	}, 500
+
+@api.app_errorhandler(404)
+def internal_error(e):
+	return {
+		"message": e.name,
+		"code": e.code,
+	}, 404
+
+@api.app_errorhandler(403)
+def internal_error(e):
+	return {
+		"message": e.name,
+		"code": e.code,
+	}, 403
+
+@api.app_errorhandler(401)
+def internal_error(e):
+	return {
+		"message": e.name,
+		"code": e.code,
+	}, 401
+
+@api.app_errorhandler(502)
+def internal_error(e):
+	return {
+		"message": e.name,
+		"code": e.code,
+	}, 502
+
+@api.app_errorhandler(400)
+def internal_error(e):
+	return {
+		"message": e.name,
+		"code": e.code,
+	}, 400

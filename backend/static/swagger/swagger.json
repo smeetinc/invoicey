@@ -71,7 +71,7 @@
 				],
 				"parameters": [
 					{
-						"name": "",
+						"name": "body",
 						"in": "body",
 						"required": true,
 						"type": "object",
@@ -105,12 +105,12 @@
 				}
 			}
 		},
-		"/overview-data/": {
+		"/api/overview-data/": {
 			"get": {
 				
 			}
 		},
-		"/register-user/": {
+		"/api/register-user/": {
 			"post": {
 				"summary": "Creating User Application",
 				"produces": [
@@ -126,32 +126,30 @@
 						"type": "object",
 						"required": true,
 						"description": "register-user data",
-						"schema": {
-							"type": "object",
-							"properties": {
-								"email": {
-									"type": "string",
-									"example": "example@email.com"
-								},
-								"name": {
-									"type": "string",
-									"example": "John. Doe"
-								},
-								"password": {
-									"type": "string",
-									"example": "password"
-								},
-								"busi_nm": {
-									"type": "string",
-									"example": "Business Name"
-								},
-								"birth_date": {
-									"type": "string",
-									"example": "dd/mm/yyyy",
-								}
-
+						"properties": {
+							"email": {
+								"type": "string",
+								"example": "example@email.com"
+							},
+							"name": {
+								"type": "string",
+								"example": "John. Doe"
+							},
+							"password": {
+								"type": "string",
+								"example": "password"
+							},
+							"busi_nm": {
+								"type": "string",
+								"example": "Business Name"
 							}
 						},
+					},
+					{
+						"name": "X-CSRFToken",
+						"in": "header",
+						"type": "string",
+						"required": true,
 					}
 				],
 				"responses": {
@@ -185,7 +183,7 @@
 				]
 			}
 		},
-		"/all-clients/": {
+		"/api/all-clients/": {
 			"get": {
 				"summary": "Returns all-clients data",
 				"produces": [
@@ -251,7 +249,7 @@
 				}
 			}
 		},
-		"/user/password-reset/": {
+		"/api/user/password-reset/": {
 			"post": {
 				"description": "Posts Json Data",
 				"tags": [
@@ -259,7 +257,7 @@
 				]
 			}
 		},
-		"/invoices-data/": {
+		"/api/invoices-data/": {
 			"get": {
 				"description": "Gets Invoices Data",
 				"tags": [

@@ -25,11 +25,13 @@ class BaseMixin:
 class User(db.Model, BaseMixin, UserMixin):
     __tablename__ = "users"
     first_name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    business = db.relationship("Business", backref="business", uselist=False)
+    business = db.relationship("Business", backref="user", uselist=False)
     created_on = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     clients = db.relationship("Client", backref='user', lazy=True)
+    invoices = db.relationship("Invoice", backref="user", lazy=True)
     password = db.Column(db.Text, nullable=False)
     is_activate = db.Column(db.Boolean, default=False)
 
@@ -52,6 +54,12 @@ class User(db.Model, BaseMixin, UserMixin):
             checks if the given client id was created by the user
         """
         return (_id in [client.pk for client in self.clients])
+
+    def invoice_created_by_me(self, _id: int):
+        """\
+            checks if the given invoice id was created by the user
+        """
+        return (_id in [invoice.pk for client in self.invoices])
 
     @staticmethod
     def create_jwt_token(**kwargs) -> str:
