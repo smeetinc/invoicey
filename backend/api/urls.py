@@ -1,8 +1,7 @@
 from flask import jsonify, make_response, url_for, request, current_app, render_template as render
-from flask_login import current_user, login_user, logout_user, login_required
 from users.models import User, Invoice, Client, Business
 from utils import smtnb, send_mail_text, send_mail
-from main import db
+from main import db, auth
 from .views import ClientDataAPIView, MultipleClientDataAPIView
 from . import api
 import jwt
@@ -34,11 +33,11 @@ def authenticate():
 		if user and user.check_hash(password):
 			if not user.is_deleted:
 				if user.is_activate:
-					login_user(user, remember=remember)
+					#creates the refresh token to be remembered
 					auth_message['valid'] = True
 					auth_message['message'] = 'User logged in successfully'
 					auth_message['level'] = 'success'
-					auth_message['authenticated'] = current_user.is_authenticated
+					auth_message['authenticated'] = False
 					auth_message['data'] = bool(json)
 					return auth_message
 				auth_message['valid'] = True
@@ -50,7 +49,7 @@ def authenticate():
 		auth_message['level'] = 'warning'
 		return auth_message, 401
 	auth_message['data'] = bool(json)
-	auth_message['authenticated'] = current_user.is_authenticated
+	auth_message['authenticated'] = False
 	return auth_message, 401
 
 @api.post('/register-user/')
@@ -91,7 +90,8 @@ def signup():
 def activate_user(token: str):
 	try:
 		token = User.decode_jwt_token(token)
-		if token:
+		_id = token.get("id")
+		if token and _id:
 			user = User.query.get(_id=token[_id])
 			if user:
 				user.is_activate = True
@@ -169,9 +169,9 @@ def verify_reset(token: str, _id: int):
 			data['message'] = "Validated"
 			return data
 @api.get('/overview-data/')
-@login_required
+@auth.login_required
 def overview():
-	invoices = current_user.business.invoices
+	invoices = auth.current_user().business.invoices
 	total_invoices = len(invoices)
 	total_dued = 0
 	total_paid = 0
@@ -191,7 +191,7 @@ def overview():
 	return data
 
 @api.get("/invoices-data/")
-@login_required
+@auth.login_required
 def invoices():
 	per_page = current_app.config.get('PER_PAGE', 3)
 	page = request.args.get('page', type=int)
