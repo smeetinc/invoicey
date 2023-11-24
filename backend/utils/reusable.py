@@ -6,13 +6,18 @@ import threading
 
 
 def send_mail(*args, **kwargs) -> Message:
-	pass
+	try:
+		msg = Message(*args, **kwargs)
+		mail.send(msg)
+		return True
 
 def send_mail_text(subject: str, message: str, recipients: list=[]) -> Message:
-	msg = Message(subject, recipients=recipients)
-	msg.body = Message
-	mail.send(msg)
-	return True
+	try:
+		msg = Message(subject, recipients=recipients)
+		msg.body = message
+		mail.send(msg)
+		return True
+	return False
 
 def send_mail_text_nonblocking(
 			subject: str,
@@ -21,4 +26,4 @@ def send_mail_text_nonblocking(
 	process = threading.Thread(target=send_mail_text,
 					args=(subject, message),
 					kwargs={"recipients": recipients})
-	p.run()
+	return process.start()
