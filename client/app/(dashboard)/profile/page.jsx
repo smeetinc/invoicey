@@ -49,6 +49,13 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
         `https://nubapi.com/verify?account_number=${accountNumber}&bank_code=${selectedBankCode}`,
         {
           signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer 4vvFJ5AkL6QNrFkFtupVzJ1lIvS22vArJkEw1cM3c297bb53",
+          },
+          method: "GET",
+          mode: "no-cors",
         }
       );
       const data = await res.json();
