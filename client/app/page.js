@@ -75,9 +75,11 @@ function login() {
             <div className="text-center my-2">
               <small className="text-center">
                 Don't have an account?&nbsp;
-                <span className="text-primary font-bold cursor-pointer">
-                  Sign up
-                </span>
+                <a href="/signup">
+                  <span className="text-primary font-bold cursor-pointer">
+                    Sign up
+                  </span>
+                </a>
               </small>
             </div>
           </div>
