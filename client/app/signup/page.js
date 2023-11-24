@@ -3,7 +3,6 @@ import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { TbEyeSearch } from "react-icons/tb";
-import "../components/authForm.css";
 import axios from "axios";
 
 function signup() {
@@ -29,11 +28,13 @@ function signup() {
             },
           }
         );
+        console.log(response);
 
-        setCsrfToken(response.data.csrfToken);
+        setCsrfToken(response.data.csrf_token);
       } catch (error) {
         console.error("Error fetching CSRF token:", error);
         // Handle error accordingly
+        console.log(error);
       }
     }
 
@@ -73,16 +74,21 @@ function signup() {
       busi_nm: businessname,
     };
 
+    const jsonData = JSON.stringify(formData);
+    console.log(csrfToken);
+
     // Make the POST request with Axios
+    axios.defaults.headers.common["X-Token"] = csrfToken;
     try {
       const response = await axios.post(
-        "http://olatidejosepha.pythonanywhere.com/register-user/", // Replace with your actual Flask backend URL
-        formData,
+        "http://olatidejosepha.pythonanywhere.com/api/register-user/", // Replace with your actual Flask backend URL
+        jsonData,
         {
           headers: {
             "Content-Type": "application/json",
-            "CSRF-Token": csrfToken,
+            "X-Token": csrfToken,
           },
+          withCredentials: true,
         }
       );
 
