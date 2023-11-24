@@ -5,16 +5,16 @@ import React, { useState } from "react";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { TbEyeSearch } from "react-icons/tb";
 
-function signup() {
+function passwordreset() {
   const [show, setShow] = useState(false);
   return (
     <div className="w-full bg-accent h-screen p-6">
       <div className="flex mx-auto w-3/5 shadow-sm">
         <div className="w-full hidden lg:flex">
           <Image
-            src="/assets/authImg.png"
-            width={500}
-            height={500}
+            src="/assets/Padlock.png"
+            width={242.33}
+            height={180.57}
             className="h-full w-full"
             alt="A lady reading some documents"
           />
@@ -23,49 +23,15 @@ function signup() {
           <h2 className="text-primary text-3xl font-clashDisplay leading-10 font-bold">
             INVOICEY
           </h2>
-          <h4 className="text-center font-clashDisplay font-semibold leading-10 text-3xl">
-            Sign up
+          <h4 className="text-center font-clashDisplay font-semibold leading-10 text-3xl mt-20">
+            Password Reset
           </h4>
           <p className="text-center font-medium leading-7">
-            Let's get you started
+            enter your new password below.
           </p>
 
           <div>
             <form className="">
-              <div>
-                <label htmlFor="fullName" className="">
-                  Full Name
-                </label>
-                <br />
-                <input
-                  className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
-                  type="text"
-                  placeholder="Olajide Jacob"
-                  name="fullName"
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="businessName" className="">
-                  Business Name
-                </label>
-                <br />
-                <input
-                  className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
-                  type="text"
-                  placeholder="Olajide Jacob"
-                  name="businessName"
-                />
-              </div>
-              <div className="mt-2">
-                <label htmlFor="emailAddress">Email Address</label>
-                <br />
-                <input
-                  className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
-                  type="email"
-                  placeholder="Olajide Jacob"
-                  name="emailAddress"
-                />
-              </div>
               <div className="mt-2">
                 <label htmlFor="password">Password</label>
                 <br />
@@ -117,7 +83,7 @@ function signup() {
 
               <div className="my-2">
                 <button className="bg-primary text-white px-auto py-3 w-full rounded cursor-pointer my-2">
-                  Continue
+                  Submit
                 </button>
               </div>
             </form>
@@ -136,4 +102,4 @@ function signup() {
   );
 }
 
-export default signup;
+export default passwordreset;
