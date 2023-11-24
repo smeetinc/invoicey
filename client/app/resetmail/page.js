@@ -26,7 +26,9 @@ function resetmail() {
             <p className="font-medium text-dark my-4">
               A link has been sent to your mail.
             </p>
-            <small className="">Go back to Login page</small>
+            <a href="/">
+              <small className="">Go back to Login page</small>
+            </a>
           </div>
         </div>
       </div>
