@@ -13,9 +13,12 @@ from utils import Config, DevelopmentConfig
 SWAGGER_URL = '/api-docs'
 API_URL = '/static/swagger/swagger.json'
 ALLOWED_ORGINS = [
+    "http://localhost:3000",
     "http://localhost:3000/",
     "http://localhost:5000/",
+    "http://olatidejosepha.pythonanywhere.com/"
     "https://invoicey-one.vercel.app",
+    "https://olatidejosepha.pythonanywhere.com/"
 ]
 
 
@@ -32,7 +35,8 @@ swagger = get_swaggerui_blueprint(
         'app_name': "Invoicey Application API"
     }
 )
-
+login_manager.login_message = "User Logged in successfully"
+login_manager.login_message_category = "success"
 def create_app():
     """\
         A function that creates the application instance
@@ -43,7 +47,8 @@ def create_app():
     db.init_app(app)
     csrf.init_app(app)
     mail.init_app(app)
-    cors.init_app(app, origins=ALLOWED_ORGINS, supports_credentials=True)
+    cors.init_app(app, origins="*", supports_credentials=True,
+                  methods=['POST', 'GET', 'DELETE', 'PUT'])
     login_manager.init_app(app)
 
     from users import users
@@ -59,3 +64,5 @@ def create_app():
     return app
 
 app = create_app()
+
+mail = mail
