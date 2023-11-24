@@ -1,0 +1,390 @@
+{
+	"openapi": "3.0.2",
+	"info": {
+		"title": "Invoicey backend API",
+		"description": "Api that connects the inner workings of Invoicey application",
+		"version": "1.0.0"
+	},
+	"tags": [
+		{
+			"name": "Users",
+			"description": "The user application endpoints"
+		},
+		{
+			"name": "Clients",
+			"description": "The clients application endpoints"
+		},
+		{
+			"name": "Invoices",
+			"description": "The invoices application endpoints"
+		}
+	],
+	"basePath": "/",
+	"schemes": [
+		"http",
+		"https"
+	],
+	"security": [
+		{
+			"sessionAuth": []
+		}
+	],
+	"consumes": [
+		"application/json"
+	],
+	"produces": [
+		"application/json"
+	],
+	"paths": {
+		"/": {
+			"get": {
+				"summary": "Returns a csrf_token for all post requests",
+				"produces":[
+					"application/json"
+				],
+				"security": [
+				],
+				"parameters": [
+					{
+						"name": "is-from-site",
+						"in": "header",
+						"required": true,
+						"type": "string",
+						"description": "Required header to validate"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/authenticate/": {
+			"post": {			
+				"summary": "Accepts User JSON Auth Data",
+				"produces": [
+					"application/json"
+				],
+				"consumes": [
+					"application/json"
+				],
+				"tags": [
+					"Users"
+				],
+				"security": [
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"email": {
+								"type": "string",
+								"example": "email.com"
+							},
+							"password": {
+								"type": "string",
+								"example": "password"
+							}
+						}
+					},
+					{
+						"name": "X-Token",
+						"in": "header",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/overview-data/": {
+			"get": {
+				
+			}
+		},
+		"/api/register-user/": {
+			"post": {
+				"summary": "Creating User Application",
+				"produces": [
+					"application/json"	
+				],
+				"consumes": [
+					"application/json"	
+				],
+				"tags": [
+					"Users"
+				],
+				"security": [
+				],
+				"parameters":[
+					{
+						"name": "json",
+						"in": "body",
+						"type": "object",
+						"required": true,
+						"description": "register-user data",
+						"properties": {
+							"email": {
+								"type": "string",
+								"example": "example@email.com"
+							},
+							"name": {
+								"type": "string",
+								"example": "John. Doe"
+							},
+							"password": {
+								"type": "string",
+								"example": "password"
+							},
+							"busi_nm": {
+								"type": "string",
+								"example": "Business Name"
+							}
+						}
+					},
+					{
+						"name": "X-Token",
+						"in": "header",
+						"type": "string",
+						"required": true
+					}
+				],
+				"responses": {
+					"200":{
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"items": {
+										"type": "object",
+										"properties": {
+											"created": {
+												"type":"boolean"
+											},
+											"message": {
+												"type":"string"
+											},
+											"status": {
+												"type":"string"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/all-clients/": {
+			"get": {
+				"summary": "Returns all-clients data",
+				"produces": [
+					"application/json"
+				],
+				"tags": [
+					"Clients"	
+				],
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "object",
+												"properties": {
+													"id": {
+														"type": "string",
+														"example": "EP{id}"
+													},
+													"name": {
+														"type": "string",
+														"example": "Test User Name"
+													},
+													"email": {
+														"type": "string",
+														"example": "email@email.com"
+													},
+													"phone": {
+														"type": "string",
+														"example": "9000000000",
+														"length": 10
+													},
+													"birth_date": {
+														"type": "string",
+														"example": "dd/mm/yy"
+													},
+													"gender": {
+														"type": "string",
+														"example": "M",
+														"length": 1
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/invoices-data/": {
+			"get": {
+				"description": "Gets Invoices Data",
+				"tags": [
+					"Invoices"
+				],
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"required": true
+					}
+				]
+			}
+		},
+		"/api/users/password-reset/": {
+			"post": {
+				"description": "Activate the token passed int",
+				"tags": [
+					"Users"
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"email": {
+								"type": "string",
+								"example": "example@email.com"
+							}
+						}
+					},
+					{
+						"name": "X-Token",
+						"in": "header",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"security": [
+				]
+			}
+		},
+		"/api/users/activate/{token}/": {
+			"post": {
+				"description": "Activate the token passed int",
+				"tags": [
+					"Users"
+				],
+				"parameters": [
+					{
+						"name": "token",
+						"in": "path",
+						"required": true
+					},
+					{
+						"name": "X-Token",
+						"in": "header",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"security": [
+				]
+			}
+		},
+		"/api/clients/": {
+			"post": {
+				"description": "Creates the clients",
+				"tags": [
+					"Clients"
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string",
+								"example": "John. Client"
+							},
+							"email": {
+								"type": "string",
+								"example": "John. Client"
+							},
+							"birth_date": {
+								"type": "string",
+								"example": "John. Client"
+							},
+							"phone": {
+								"type": "string",
+								"example": "+234790989087"
+							}
+						}
+					},
+					{
+						"name": "X-Token",
+						"in": "header",
+						"required": true,
+						"type": "string"
+					}
+				]
+			},
+			"get": {
+				"description": "Get the a single client with the given id",
+				"tags": [
+					"Clients"
+				],
+				"parameters": [
+					{
+						"name": "_id",
+						"in": "query",
+						"required": true,
+						"type": "integer"
+					}
+				],
+				"security": {
+					"sessionAuth": []
+				}
+
+			}
+		}
+	}
+}
