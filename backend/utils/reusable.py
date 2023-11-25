@@ -26,9 +26,9 @@ def send_mail_text(subject: str, message: str ='', recipients: list=[], **kwargs
 
 def send_mail_text_nonblocking(
 			subject: str,
-			message: str,
-			recipients: list=[]) -> None:
+			message: str = '',
+			recipients: list=[], **kwargs) -> None:
 	process = threading.Thread(target=send_mail_text,
 					args=(subject, message),
-					kwargs={"recipients": recipients})
+					kwargs={"recipients": recipients, **kwargs})
 	return process.start()

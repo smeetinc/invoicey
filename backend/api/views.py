@@ -156,8 +156,8 @@ class InvoiceDataAPIView(MethodView):
 				db.session.commit()
 				#send a nonblocking io mail
 				smtnb(f"Invoice Notification for {inv_id}",
-					render("pay_invoice.html", invoice=invoice, client=client),
-					recipients=[client.email])
+					recipients=[client.email],
+					html=render("pay_invoice.html", invoice=invoice, client=client))
 				return {
 					"message": "invoice created",
 					"status": "success"
