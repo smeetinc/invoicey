@@ -321,7 +321,15 @@
 							"Authorization": "Bearer {Token}"
 						}
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"description": "A Successful Response",
+						"content": [
+							"application/json"
+						]
+					}
+				}
 			}
 		},
 		"/api/users/password-reset/": {

@@ -71,19 +71,23 @@ def signup():
 			busi_nm = json.get("busi_name")
 			password = json.get("password")
 			hashed = User.generate_hash(password)
-			first, last = name.split()
-			user = User(first_name=first, last_name=last, password=hashed, email=email, name=name)
-			business = Business(name=busi_nm, merchant=user)
-			db.session.add_all([user, business])
-			db.session.commit()
-			register_message['created'] = True
-			register_message['message'] = "User created please check your email for validation"
-			register_message['status'] = "success"
-			token = user.encode_id()
-			subject = "verify your email address"
-			message = render("mail/creation_verify.html", token=token, user=user)
-			smtnb(subject, message, recipients=[email])
-			return register_message, 201
+			li_name = name.split()
+			if len(li_name) == 2:
+				first, last = li_name[0], li_name[1]
+				user = User(first_name=first, last_name=last, password=hashed, email=email, name=name)
+				business = Business(name=busi_nm, merchant=user)
+				db.session.add_all([user, business])
+				db.session.commit()
+				register_message['created'] = True
+				register_message['message'] = "User created please check your email for validation"
+				register_message['status'] = "success"
+				token = user.encode_id()
+				subject = "verify your email address"
+				message = render("mail/creation_verify.html", token=token, user=user)
+				smtnb(subject, message, recipients=[email])
+				return register_message, 201
+			register_message["message"] = "You can only pass in First and Last Name"
+			return register_message
 		register_message['created'] = True
 		register_message['message'] = "User already exists"
 		return register_message
