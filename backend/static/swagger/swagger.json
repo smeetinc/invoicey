@@ -108,6 +108,10 @@
 									"type": "object",
 									"description": "If posted data is oks",
 									"items": {
+										"data": {
+											"type": "boolean",
+											"example": true
+										},
 										"refresh_token": {
 											"type": "string",
 											"example": "jwt"
@@ -123,6 +127,42 @@
 										"level": {
 											"type": "string",
 											"example": "NOTSET"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Not Authorzed Request",
+									"items": {
+									    "authenticated":{
+									    	"type": "boolean",
+									    	"example": false
+										},
+									    "data": {
+									    	"type": "boolean",
+									    	"example": false
+									    },
+										"level": {
+											"type": "string",
+											"example": "warning"
+										},
+										"message": {
+											"type": "string",
+											"example": "Invalid credentials"
+										},
+										"refresh_token": {
+											"type": "string"
+										},
+										"valid": {
+											"type": "boolean",
+											"example": false
 										}
 									}
 								}

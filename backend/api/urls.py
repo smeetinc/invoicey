@@ -22,7 +22,8 @@ def authenticate():
 		"message": 'User Not Found',
 		"level": 'NOTSET',
 		"authenticated": False,
-		"data": False
+		"data": False,
+		"refresh_token": "",
 	}
 	if json:
 		email = json.get('email')
