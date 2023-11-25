@@ -104,7 +104,28 @@
 						"description": "OK",
 						"content": {
 							"application/json": {
-
+								"schema": {
+									"type": "object",
+									"description": "If posted data is oks",
+									"items": {
+										"refresh_token": {
+											"type": "string",
+											"example": "jwt"
+										},
+										"authenticated": {
+											"type": "boolean",
+											"example": false
+										},
+										"valid": {
+											"type": "boolean",
+											"example": true
+										},
+										"level": {
+											"type": "string",
+											"example": "NOTSET"
+										}
+									}
+								}
 							}
 						}
 					}
@@ -125,7 +146,14 @@
 							"Authorization": "Bearer {Token}"
 						}
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"content": [
+							"application/json",
+						]
+					}
+				}
 			}
 		},
 		"/api/register-user/": {
@@ -197,7 +225,7 @@
 				}
 			}
 		},
-		"/api/all-clients/": {
+		"/api/all-client-data/": {
 			"get": {
 				"summary": "Returns all-clients data",
 				"produces": [
@@ -284,7 +312,6 @@
 						"in": "query",
 						"required": true
 					},
-					,
 					{
 						"name": "Authorization",
 						"in": "header",
@@ -375,6 +402,10 @@
 							"phone": {
 								"type": "string",
 								"example": "+234790989087"
+							},
+							"gender": {
+								"type": "string",
+								"example": "F/M"
 							}
 						}
 					},

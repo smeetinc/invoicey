@@ -1,7 +1,7 @@
 from flask.views import MethodView, View
 from flask import request, current_app, url_for, request, render_template as render
 from users.models import Client, User, Invoice
-from utils import send_mail_text_nonblocking as smtnb
+from utils import smtnb
 from main import auth, db
 import datetime
 import secrets
