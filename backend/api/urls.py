@@ -97,8 +97,10 @@ def signup():
 @api.post("/users/resend-creation-link/")
 def resend_creation_link():
 	json = request.get_json()
-	user = User.query.filter_by(email=json.get('email')).first()
+	email = json.get('email')
+	user = User.query.filter_by(email=email).first()
 	if user:
+		token = user.encode_id()
 		subject = "Verify Your Invoicy Account"
 		html = render("mail/creation_verify.html", token=token, user=user)
 		smtnb(subject, recipients=[email], html=html)

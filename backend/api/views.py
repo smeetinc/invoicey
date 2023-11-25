@@ -108,31 +108,30 @@ class InvoiceDataAPIView(MethodView):
 	decorators = [auth.login_required]
 
 	def get(self):
-		client_name = request.args.get("client_name")
-		client = Client.query.filter_by(name=client_name).first()
-		if client and not client.is_deleted:
-			invoice = Invoice.query.filter_by(inv_id=name).last()
-			if invoice and not invoice.is_deleted:
-				return {
-					"inv_id": invoice.inv_id,
-					"product_name": invoice.product,
-					"description": invoice.description,
-					"client_name": client_name,
-					"amount": client.amount,
-					"has_paid": client.has_paid,
-					"due_date": client.due_date.strftime("%d/%m/%Y"),
-					"pay_type": client.payment_type,
-				}
-			return {
-				"message": "invoice not found",
-				"valid": False
-			}
+		inv_id = request.args.get("inv_id")
+		invoice = Invoice.query.filter_by(inv_id=inv_id).first()
+		if invoice and not invoice.is_deleted:
+				client = invoice.client
+				if client and not client.is_deleted:
+					return {
+						"inv_id": invoice.inv_id,
+						"product_name": invoice.product,
+						"description": invoice.description,
+						"client_name": invoice.name,
+						"amount": invoice.amount,
+						"has_paid": invoice.has_paid,
+						"due_date": invoice.due_date.strftime("%d/%m/%Y"),
+						"pay_type": invoice.payment_type,
+					}
 		return {
-			"message": "client passed in is not found",
-			"valid": False,
+			"message": "invoice not found",
+			"valid": False
 		}
+	
 	def delete(self):
-		pass
+		json = request.get_json()
+		if json:
+			pass
 	def post(self):
 		data = request.get_json()
 		if data:
