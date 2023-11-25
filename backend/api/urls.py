@@ -232,35 +232,35 @@ def internal_error(e):
 	}, 500
 
 @api.app_errorhandler(404)
-def internal_error(e):
+def not_found(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 404
 
 @api.app_errorhandler(403)
-def internal_error(e):
+def forbidden(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 403
 
 @api.app_errorhandler(401)
-def internal_error(e):
+def unauthorized(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 401
 
 @api.app_errorhandler(502)
-def internal_error(e):
+def bad_gateway(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 502
 
 # @api.app_errorhandler(400)
-# def internal_error(e):
+# def bad_request(e):
 # 	return {
 # 		"message": e.nam
 # 		"code": e.code,
