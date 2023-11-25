@@ -1,8 +1,7 @@
 from flask import jsonify, make_response, url_for, request, current_app, render_template as render
-from flask_login import current_user, login_user, logout_user, login_required
 from users.models import User, Invoice, Client, Business
 from utils import smtnb, send_mail_text, send_mail
-from main import db
+from main import db, auth
 from .views import ClientDataAPIView, MultipleClientDataAPIView
 from . import api
 import jwt
@@ -33,13 +32,16 @@ def authenticate():
 		print(user)
 		if user and user.check_hash(password):
 			if not user.is_deleted:
-				if user.is_activate:
-					login_user(user, remember=remember)
+				if user.is_activated:
+					#creates the refresh token to be remembered
+					refresh_token = user.encode_id()
+					#after token created
 					auth_message['valid'] = True
 					auth_message['message'] = 'User logged in successfully'
 					auth_message['level'] = 'success'
-					auth_message['authenticated'] = current_user.is_authenticated
+					auth_message['authenticated'] = False
 					auth_message['data'] = bool(json)
+					auth_message['refresh_token'] = refresh_token
 					return auth_message
 				auth_message['valid'] = True
 				auth_message['message'] = "Account is not activated please check your email to activate"
@@ -50,7 +52,7 @@ def authenticate():
 		auth_message['level'] = 'warning'
 		return auth_message, 401
 	auth_message['data'] = bool(json)
-	auth_message['authenticated'] = current_user.is_authenticated
+	auth_message['authenticated'] = False
 	return auth_message, 401
 
 @api.post('/register-user/')
@@ -71,7 +73,7 @@ def signup():
 			hashed = User.generate_hash(password)
 			first, last = name.split()
 			user = User(first_name=first, last_name=last, password=hashed, email=email, name=name)
-			business = Business(name="busi_nm", merchant=user)
+			business = Business(name=busi_nm, merchant=user)
 			db.session.add_all([user, business])
 			db.session.commit()
 			register_message['created'] = True
@@ -79,7 +81,7 @@ def signup():
 			register_message['status'] = "success"
 			token = user.encode_id()
 			subject = "verify your email address"
-			message = render("mail/creation_verify.txt", token=token, user=user)
+			message = render("mail/creation_verify.html", token=token, user=user)
 			smtnb(subject, message, recipients=[email])
 			return register_message, 201
 		register_message['created'] = True
@@ -91,10 +93,11 @@ def signup():
 def activate_user(token: str):
 	try:
 		token = User.decode_jwt_token(token)
-		if token:
+		_id = token.get("id")
+		if token and _id:
 			user = User.query.get(_id=token[_id])
 			if user:
-				user.is_activate = True
+				user.is_activated = True
 				db.session.add(user)
 				db.session.commit()
 				return {
@@ -131,7 +134,7 @@ def reset_password():
 				token = user.encode_id()
 				if token:
 					subject = "Reset Password Token"
-					message = render("mail/creation_verify.txt", token=token, user=user)
+					message = render("mail/creation_verify.html", token=token, user=user)
 					smtnb(subject, message, recipients=[email])
 					return {
 						"status": "success",
@@ -163,15 +166,15 @@ def verify_reset(token: str, _id: int):
 	if user:
 		decoded = user.decode_jwt_token(token)
 		if decoded.get('id') == _id:
-			user.is_activate = True
+			user.is_activated = True
 			db.session.add(user)
 			db.session.commit()
 			data['message'] = "Validated"
 			return data
 @api.get('/overview-data/')
-@login_required
+@auth.login_required
 def overview():
-	invoices = current_user.business.invoices
+	invoices = auth.current_user().business.invoices
 	total_invoices = len(invoices)
 	total_dued = 0
 	total_paid = 0
@@ -191,7 +194,7 @@ def overview():
 	return data
 
 @api.get("/invoices-data/")
-@login_required
+@auth.login_required
 def invoices():
 	per_page = current_app.config.get('PER_PAGE', 3)
 	page = request.args.get('page', type=int)
@@ -255,6 +258,6 @@ def internal_error(e):
 # @api.app_errorhandler(400)
 # def internal_error(e):
 # 	return {
-# 		"message": e.name,
+# 		"message": e.nam
 # 		"code": e.code,
 # 	}, 400

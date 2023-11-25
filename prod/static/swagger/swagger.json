@@ -1,5 +1,5 @@
 {
-	"openapi": "3.0.2",
+	"swagger": "2.0",
 	"info": {
 		"title": "Invoicey backend API",
 		"description": "Api that connects the inner workings of Invoicey application",
@@ -26,7 +26,7 @@
 	],
 	"security": [
 		{
-			"sessionAuth": []
+			"bearerAuth": []
 		}
 	],
 	"consumes": [
@@ -46,11 +46,14 @@
 				],
 				"parameters": [
 					{
-						"name": "is-from-site",
+						"name": "Authorization",
 						"in": "header",
 						"required": true,
 						"type": "string",
-						"description": "Required header to validate"
+						"description": "Required header to validate",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"responses": {
@@ -87,19 +90,13 @@
 						"properties": {
 							"email": {
 								"type": "string",
-								"example": "email.com"
+								"example": "test@email.com"
 							},
 							"password": {
 								"type": "string",
 								"example": "password"
 							}
 						}
-					},
-					{
-						"name": "X-Token",
-						"in": "header",
-						"required": true,
-						"type": "string"
 					}
 				],
 				"responses": {
@@ -116,7 +113,19 @@
 		},
 		"/api/overview-data/": {
 			"get": {
-				
+				"summary": "Gets the dashboard data",
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true,
+						"type": "string",
+						"description": "Required header to validate",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
+					}
+				]
 			}
 		},
 		"/api/register-user/": {
@@ -158,12 +167,6 @@
 								"example": "Business Name"
 							}
 						}
-					},
-					{
-						"name": "X-Token",
-						"in": "header",
-						"type": "string",
-						"required": true
 					}
 				],
 				"responses": {
@@ -208,6 +211,15 @@
 						"name": "page",
 						"in": "query",
 						"required": true
+					},
+					{
+						"name": "Authorization",
+						"in": "header",
+						"type": "string",
+						"required": true,
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"responses": {
@@ -271,6 +283,16 @@
 						"name": "page",
 						"in": "query",
 						"required": true
+					},
+					,
+					{
+						"name": "Authorization",
+						"in": "header",
+						"type": "string",
+						"required": true,
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				]
 			}
@@ -293,12 +315,6 @@
 								"example": "example@email.com"
 							}
 						}
-					},
-					{
-						"name": "X-Token",
-						"in": "header",
-						"required": true,
-						"type": "string"
 					}
 				],
 				"security": [
@@ -316,14 +332,17 @@
 						"name": "token",
 						"in": "path",
 						"required": true
-					},
-					{
-						"name": "X-Token",
-						"in": "header",
-						"required": true,
-						"type": "string"
 					}
 				],
+				"responses":{
+					"200":{
+						"content":{
+							"application/json":{
+								
+							}
+						}
+					}
+				},
 				"security": [
 				]
 			}
@@ -347,11 +366,11 @@
 							},
 							"email": {
 								"type": "string",
-								"example": "John. Client"
+								"example": "client@invoicey.com"
 							},
 							"birth_date": {
 								"type": "string",
-								"example": "John. Client"
+								"example": "12/11/2022"
 							},
 							"phone": {
 								"type": "string",
@@ -360,12 +379,23 @@
 						}
 					},
 					{
-						"name": "X-Token",
+						"name": "Authorization",
 						"in": "header",
 						"required": true,
-						"type": "string"
+						"type": "string",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": [
+							"application/json"
+						]
+					}
+				}
 			},
 			"get": {
 				"description": "Get the a single client with the given id",
@@ -378,10 +408,20 @@
 						"in": "query",
 						"required": true,
 						"type": "integer"
+					},
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true,
+						"type": "string"
 					}
 				],
-				"security": {
-					"sessionAuth": []
+				"responses": {
+					"200": {
+						"content": [
+							"application/json"
+						]
+					}
 				}
 
 			}

@@ -1,17 +1,18 @@
 from flask.views import MethodView, View
-from flask_login import login_required, current_user
 from flask import request, current_app, url_for, request
-from users.models import Client
+from users.models import Client, User, Invoice
+from main import auth, db
 import datetime
+import secrets
 
 class MultipleClientDataAPIView(View):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def dispatch_request(self):
 		page = request.args.get('page',1, type=int)
 		per_page = current_app.config.get('PER_PAGE')
-		user = current_user._get_current_object()
+		user = auth.current_user()
 		pclients = Client.query.filter_by(user=user).paginate(page=page, per_page=per_page)
 		data = {
 			"clients": [
@@ -32,14 +33,14 @@ class MultipleClientDataAPIView(View):
 
 class ClientDataAPIView(MethodView):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def get(self):
-		client_id = request.args.get("name")
-		client_id = int(client_id.strip("EP"))
-		client = Client.query.filter_by(name=client_id)
-		if client and client.\
-				client_created_by_me(client_id.pk) and not client.is_deleted:
+		client_id = request.args.get("_id")
+		client_id = int(client_id)
+		client = Client.query.get(client_id)
+		if client and auth.current_user().\
+				client_created_by_me(client_id) and (not client.is_deleted):
 			client_data = {
 				"id": f'EP{client._id}',
 				"name": client.name,
@@ -61,19 +62,20 @@ class ClientDataAPIView(MethodView):
 		}
 		json = request.json
 		if json:
-			user = User.query.filter_by(email=json.get('email')).first()
-			if user:
+			client = Client.query.filter_by(email=json.get('email')).first()
+			if client:
 				client_msg['message'] = "Client with that email already exists"
 				client_msg['created'] = True
 				return client_msg
 			name = json.get('name')
 			email = json.get('email')
 			birth_date = json.get('birth_date')
-			birth_date = datetime.datetime.strptime('%d/%m/%Y')
+			birth_date = datetime.datetime.strptime(birth_date, '%d/%m/%Y')
 			phone = json.get('phone')
 			gender = json.get('gender')
 			client = Client(name=name, email=email,
-						birth_date=birth_date, phone=phone, gender=gender)
+						birth_date=birth_date, phone=phone, gender=gender,
+						user=auth.current_user())
 			db.session.add(client)
 			db.session.commit()
 			client_msg['valid'] = True
@@ -82,10 +84,10 @@ class ClientDataAPIView(MethodView):
 		return client_msg
 
 	def delete(self):
-		client_id = request.args.get('id')
-		client_id = client_id.strip("EP")
+		client_id = request.args.get('id', type=int)
+		current_user = auth.current_user()
 		client = Client.query.get(client_id)
-		if client and client.client_created_by_me(client_id.pk)\
+		if client and current_user.client_created_by_me(client.pk)\
 				and not client.is_deleted:
 			client.is_deleted = True
 			db.session.add(client)
@@ -102,23 +104,74 @@ class ClientDataAPIView(MethodView):
 
 class InvoiceDataAPIView(MethodView):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def get(self):
-		name = request.args.get('trsc_id')
-		if name:
-			invoice = Invoice.query.filter_by(trsc_id=trsc_id).first()
-			if invoice and invoice:
-				pass
+		client_name = request.args.get("client_name")
+		client = Client.query.filter_by(name=client_name).first()
+		if client and not client.is_deleted:
+			invoice = Invoice.query.filter_by(inv_id=name).last()
+			if invoice and not invoice.is_deleted:
+				return {
+					"inv_id": invoice.inv_id,
+					"product_name": invoice.product,
+					"description": invoice.description,
+					"client_name": client_name,
+					"amount": client.amount,
+					"has_paid": client.has_paid,
+					"due_date": client.due_date.strftime("%d/%m/%Y"),
+					"pay_type": client.payment_type,
+				}
+			return {
+				"message": "invoice not found",
+				"valid": False
+			}
+		return {
+			"message": "client passed in is not found",
+			"valid": False,
+		}
 	def delete(self):
 		pass
 	def post(self):
-		pass
+		data = request.get_json()
+		if data:
+			merchant = auth.current_user()
+			inv_id = secrets.token_hex(25)
+			product_name = data.get("product_name")
+			description = data.get("description")
+			client_name = data.get("client_name")
+			amount = data.get("amt")
+			has_paid = data.get("has_paid")
+			py_type = data.get("py_type")
+			due_date = datetime.datetime.strptime(data.get("due_date"), "%d/%m/%Y")
+			client = Client.query.filter_by(name=client_name).first()
+			if client and not client.is_deleted:
+				invoice = Invoice(inv_id=inv_id, product=product_name,
+							description=description, amount=amount,
+							payment_type=py_type, has_paid=has_paid,
+							due_date=due_date, user=merchant, client=client,
+						business=merchant.business)
+				db.session.add(invoice)
+				db.session.commit()
+
+				return {
+					"message": "invoice created",
+					"status": "success"
+				}, 201
+			return {
+				"message": "A client with that name is not found",
+				"status": "error"
+			}
+		return {
+			"message": "The Json/body data is not posted",
+			"status": "error",
+		}
+
 
 
 class MultipleInvoiceDataAPIView(View):
 	init_every_request = True
-	decorators = [login_required]
+	decorators = [auth.login_required]
 
 	def dispatch_request(self, client_name):
 		client = Client.query.filter_by("name").first()
@@ -131,7 +184,7 @@ class MultipleInvoiceDataAPIView(View):
 							"description": invoice.description,
 							"has_paid": invoice.has_paid,
 							"payment_type": invoice.payment_type,
-							"due_date": invoice.due_date,
+							"due_date": invoice.due_date.strftime("%d/%m/%Y"),
 							"created_on": invoice.created_on,
 						} for invoice in client.invoices if not invoice.is_deleted
 					]

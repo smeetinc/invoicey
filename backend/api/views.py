@@ -1,6 +1,7 @@
 from flask.views import MethodView, View
-from flask import request, current_app, url_for, request
+from flask import request, current_app, url_for, request, render_template as render
 from users.models import Client, User, Invoice
+from utils import send_mail_text_nonblocking as smtnb
 from main import auth, db
 import datetime
 import secrets
@@ -153,7 +154,10 @@ class InvoiceDataAPIView(MethodView):
 						business=merchant.business)
 				db.session.add(invoice)
 				db.session.commit()
-
+				#send a nonblocking io mail
+				smtnb(f"Invoice Notification for {inv_id}",
+					render("pay_invoice.html", invoice=invoice, client=client),
+					recipients=[client.email])
 				return {
 					"message": "invoice created",
 					"status": "success"
