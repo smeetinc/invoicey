@@ -221,7 +221,6 @@ def invoices():
 def internal_error(e):
 	return {
 		"message": e.name,
-		"description": e.description,
 		"code": e.code,
 	}, 500
 
@@ -229,7 +228,6 @@ def internal_error(e):
 def internal_error(e):
 	return {
 		"message": e.name,
-		"description": e.description,
 		"code": e.code,
 	}, 404
 
@@ -237,7 +235,6 @@ def internal_error(e):
 def internal_error(e):
 	return {
 		"message": e.name,
-		"description": e.description,
 		"code": e.code,
 	}, 403
 
@@ -245,7 +242,6 @@ def internal_error(e):
 def internal_error(e):
 	return {
 		"message": e.name,
-		"description": e.description,
 		"code": e.code,
 	}, 401
 
@@ -253,14 +249,12 @@ def internal_error(e):
 def internal_error(e):
 	return {
 		"message": e.name,
-		"description": e.description,
 		"code": e.code,
 	}, 502
 
 # @api.app_errorhandler(400)
 # def internal_error(e):
 # 	return {
-# 		"message": e.name,
-"description": e.description,
+# 		"message": e.nam
 # 		"code": e.code,
 # 	}, 400

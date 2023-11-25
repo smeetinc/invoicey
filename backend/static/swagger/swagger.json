@@ -46,11 +46,14 @@
 				],
 				"parameters": [
 					{
-						"name": "is-from-site",
+						"name": "Authorization",
 						"in": "header",
 						"required": true,
 						"type": "string",
-						"description": "Required header to validate"
+						"description": "Required header to validate",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"responses": {
@@ -96,10 +99,13 @@
 						}
 					},
 					{
-						"name": "X-Token",
+						"name": "Authorization",
 						"in": "header",
 						"required": true,
-						"type": "string"
+						"type": "string",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"responses": {
@@ -160,10 +166,13 @@
 						}
 					},
 					{
-						"name": "X-Token",
+						"name": "Authorization",
 						"in": "header",
 						"type": "string",
-						"required": true
+						"required": true,
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"responses": {
@@ -295,10 +304,13 @@
 						}
 					},
 					{
-						"name": "X-Token",
+						"name": "Authorization",
 						"in": "header",
 						"required": true,
-						"type": "string"
+						"type": "string",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"security": [
@@ -318,10 +330,13 @@
 						"required": true
 					},
 					{
-						"name": "X-Token",
+						"name": "Authorization",
 						"in": "header",
 						"required": true,
-						"type": "string"
+						"type": "string",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"security": [
@@ -360,10 +375,13 @@
 						}
 					},
 					{
-						"name": "X-Token",
+						"name": "Authorization",
 						"in": "header",
 						"required": true,
-						"type": "string"
+						"type": "string",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				]
 			},
