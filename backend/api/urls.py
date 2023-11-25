@@ -24,6 +24,7 @@ def authenticate():
 		"authenticated": False,
 		"data": False,
 		"refresh_token": "",
+		"is_activated": "False"
 	}
 	if json:
 		email = json.get('email')
@@ -33,21 +34,20 @@ def authenticate():
 		print(user)
 		if user and user.check_hash(password):
 			if not user.is_deleted:
+				#creates refresh token
+				refresh_token = user.encode_id()
+				auth_message['refresh_token'] = refresh_token
+				auth_message['is_activated'] = user.is_activated
+				auth_message['data'] = bool(json)
 				if user.is_activated:
-					#creates the refresh token to be remembered
-					refresh_token = user.encode_id()
 					#after token created
 					auth_message['valid'] = True
 					auth_message['message'] = 'User logged in successfully'
 					auth_message['level'] = 'success'
-					auth_message['authenticated'] = False
-					auth_message['data'] = bool(json)
-					auth_message['refresh_token'] = refresh_token
 					return auth_message
 				auth_message['valid'] = True
 				auth_message['message'] = "Account is not activated please check your email to activate"
 				auth_message['level'] = "warning"
-				auth_message['data'] = bool(json)
 				return auth_message
 		auth_message['message'] = 'Invalid Credentials'
 		auth_message['level'] = 'warning'
@@ -139,8 +139,8 @@ def reset_password():
 				token = user.encode_id()
 				if token:
 					subject = "Reset Password Token"
-					message = render("mail/creation_verify.html", token=token, user=user)
-					smtnb(subject, message, recipients=[email])
+					html = render("mail/merchant_reset.html", token=token, user=user)
+					smtnb(subject, recipients=[email], html=html)
 					return {
 						"status": "success",
 						"message": "Mail sent !",

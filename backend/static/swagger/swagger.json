@@ -127,6 +127,10 @@
 										"level": {
 											"type": "string",
 											"example": "NOTSET"
+										},
+										"is_activated": {
+											"type": "boolean",
+											"example": false
 										}
 									}
 								}
