@@ -26,7 +26,7 @@
 	],
 	"security": [
 		{
-			"sessionAuth": []
+			"bearerAuth": []
 		}
 	],
 	"consumes": [
@@ -381,7 +381,7 @@
 					}
 				],
 				"security": {
-					"sessionAuth": []
+					"bearerAuth": []
 				}
 
 			}
