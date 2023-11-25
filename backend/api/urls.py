@@ -83,9 +83,9 @@ def signup():
 				register_message['message'] = "User created please check your email for validation"
 				register_message['status'] = "success"
 				token = user.encode_id()
-				subject = "verify your email address"
-				message = render("mail/creation_verify.html", token=token, user=user)
-				smtnb(subject, message, recipients=[email])
+				subject = "Verify Your Invoicy Account"
+				html = render("mail/creation_verify.html", token=token, user=user)
+				smtnb(subject, recipients=[email], html=html)
 				return register_message, 201
 			register_message["message"] = "You can only pass in First and Last Name"
 			return register_message
