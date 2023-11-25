@@ -514,17 +514,31 @@
 			}
 		},
 		"/api/bank/": {
-			"tags":[
-				"Payments"
+			"parameters":[
+				{
+					"name": "Authorization",
+					"in": "header",
+					"required":true,
+					"type":"string"
+				}
 			],
 			"get": {
-				"description": "Get the user or Merchant Bank Accounts"
+				"description": "Get the user or Merchant Bank Accounts",
+				"tags": [
+					"Payments"
+				]
 			},
 			"post": {
-				"description": "Saves the user bank account details"
+				"description": "Saves the user bank account details",
+				"tags": [
+					"Payments"
+				]
 			},
 			"delete": {
-				"description": "Deletes the user bank account"
+				"description": "Deletes the user bank account",
+				"tags": [
+					"Payments"
+				]
 			}
 		}
 	}
