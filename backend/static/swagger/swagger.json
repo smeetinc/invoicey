@@ -330,6 +330,15 @@
 						}
 					}
 				],
+				"responses":{
+					"200":{
+						"content":{
+							"application/json":{
+								
+							}
+						}
+					}
+				},
 				"security": [
 				]
 			}
