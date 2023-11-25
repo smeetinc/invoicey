@@ -125,7 +125,14 @@
 							"Authorization": "Bearer {Token}"
 						}
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"content": [
+							"application/json",
+						]
+					}
+				}
 			}
 		},
 		"/api/register-user/": {
@@ -197,7 +204,7 @@
 				}
 			}
 		},
-		"/api/all-clients/": {
+		"/api/all-client-data/": {
 			"get": {
 				"summary": "Returns all-clients data",
 				"produces": [
@@ -284,7 +291,6 @@
 						"in": "query",
 						"required": true
 					},
-					,
 					{
 						"name": "Authorization",
 						"in": "header",
@@ -375,6 +381,10 @@
 							"phone": {
 								"type": "string",
 								"example": "+234790989087"
+							},
+							"gender": {
+								"type": "string",
+								"example": "F/M"
 							}
 						}
 					},

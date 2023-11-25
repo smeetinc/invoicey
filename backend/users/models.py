@@ -86,7 +86,7 @@ class Client(db.Model, BaseMixin):
     birth_date = db.Column(db.Date)
     gender = db.Column(db.String(1))
     phone = db.Column(db.String(13))
-    user_id = db.Column(db.Integer, db.ForeignKey("users._id"), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users._id"))
     invoices = db.relationship("Invoice", backref="client", lazy=True)
 
 class Invoice(db.Model, BaseMixin):
