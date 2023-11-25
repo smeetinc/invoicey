@@ -81,7 +81,7 @@ def signup():
 			register_message['status'] = "success"
 			token = user.encode_id()
 			subject = "verify your email address"
-			message = render("mail/creation_verify.txt", token=token, user=user)
+			message = render("mail/creation_verify.html", token=token, user=user)
 			smtnb(subject, message, recipients=[email])
 			return register_message, 201
 		register_message['created'] = True
@@ -134,7 +134,7 @@ def reset_password():
 				token = user.encode_id()
 				if token:
 					subject = "Reset Password Token"
-					message = render("mail/creation_verify.txt", token=token, user=user)
+					message = render("mail/creation_verify.html", token=token, user=user)
 					smtnb(subject, message, recipients=[email])
 					return {
 						"status": "success",

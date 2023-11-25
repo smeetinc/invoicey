@@ -113,7 +113,19 @@
 		},
 		"/api/overview-data/": {
 			"get": {
-				
+				"summary": "Gets the dashboard data",
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true,
+						"type": "string",
+						"description": "Required header to validate",
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
+					}
+				]
 			}
 		},
 		"/api/register-user/": {
@@ -154,15 +166,6 @@
 								"type": "string",
 								"example": "Business Name"
 							}
-						}
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"type": "string",
-						"required": true,
-						"properties": {
-							"Authorization": "Bearer {Token}"
 						}
 					}
 				],
@@ -208,6 +211,15 @@
 						"name": "page",
 						"in": "query",
 						"required": true
+					},
+					{
+						"name": "Authorization",
+						"in": "header",
+						"type": "string",
+						"required": true,
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				],
 				"responses": {
@@ -271,6 +283,16 @@
 						"name": "page",
 						"in": "query",
 						"required": true
+					},
+					,
+					{
+						"name": "Authorization",
+						"in": "header",
+						"type": "string",
+						"required": true,
+						"properties": {
+							"Authorization": "Bearer {Token}"
+						}
 					}
 				]
 			}
@@ -293,15 +315,6 @@
 								"example": "example@email.com"
 							}
 						}
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"required": true,
-						"type": "string",
-						"properties": {
-							"Authorization": "Bearer {Token}"
-						}
 					}
 				],
 				"security": [
@@ -319,15 +332,6 @@
 						"name": "token",
 						"in": "path",
 						"required": true
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"required": true,
-						"type": "string",
-						"properties": {
-							"Authorization": "Bearer {Token}"
-						}
 					}
 				],
 				"responses":{

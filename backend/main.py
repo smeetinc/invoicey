@@ -39,6 +39,9 @@ def create_app():
     app.config.from_object(DevelopmentConfig)
 
     db.init_app(app)
+    ctx = app.app_context()
+    ctx.push()
+    db.create_all()
     mail.init_app(app)
     cors.init_app(app, origins="*", supports_credentials=True,
                   methods=['POST', 'GET', 'DELETE', 'PUT', 'PATCH'])
@@ -56,6 +59,7 @@ def create_app():
     return app
 
 app = create_app()
+
 
 mail = mail
 
