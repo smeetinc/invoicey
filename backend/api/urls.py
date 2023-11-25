@@ -78,7 +78,8 @@ def signup():
 			li_name = name.split()
 			if len(li_name) == 2:
 				first, last = li_name[0], li_name[1]
-				user = User(first_name=first, last_name=last, password=hashed, email=email, name=name)
+				user = User(first_name=first, last_name=last, password=hashed,
+				email=email, name=name)
 				business = Business(name=busi_nm, merchant=user)
 				db.session.add_all([user, business])
 				db.session.commit()

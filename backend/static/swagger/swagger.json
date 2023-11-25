@@ -17,6 +17,10 @@
 		{
 			"name": "Invoices",
 			"description": "The invoices application endpoints"
+		},
+		{
+			"name": "Payments",
+			"description": "Contains Payments "
 		}
 	],
 	"basePath": "/",
@@ -194,7 +198,7 @@
 				"responses": {
 					"200": {
 						"content": [
-							"application/json",
+							"application/json"
 						]
 					}
 				}
@@ -507,6 +511,20 @@
 					}
 				}
 
+			}
+		},
+		"/api/bank/": {
+			"tags":[
+				"Payments"
+			],
+			"get": {
+				"description": "Get the user or Merchant Bank Accounts"
+			},
+			"post": {
+				"description": "Saves the user bank account details"
+			},
+			"delete": {
+				"description": "Deletes the user bank account"
 			}
 		}
 	}
