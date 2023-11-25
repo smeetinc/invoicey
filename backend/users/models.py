@@ -1,5 +1,4 @@
 from werkzeug.security import generate_password_hash as generate, check_password_hash as check_pass
-from flask_login import UserMixin
 from flask import current_app
 from main import db
 import datetime
@@ -28,7 +27,7 @@ class User(db.Model, BaseMixin):
     clients = db.relationship("Client", backref='user', lazy=True)
     invoices = db.relationship("Invoice", backref="user", lazy=True)
     password = db.Column(db.Text, nullable=False)
-    is_activate = db.Column(db.Boolean, default=False)
+    is_activated = db.Column(db.Boolean, default=False)
 
     @staticmethod
     def generate_hash(password: str) -> str:

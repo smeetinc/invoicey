@@ -90,21 +90,12 @@
 						"properties": {
 							"email": {
 								"type": "string",
-								"example": "email.com"
+								"example": "test@email.com"
 							},
 							"password": {
 								"type": "string",
 								"example": "password"
 							}
-						}
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"required": true,
-						"type": "string",
-						"properties": {
-							"Authorization": "Bearer {Token}"
 						}
 					}
 				],
@@ -362,11 +353,11 @@
 							},
 							"email": {
 								"type": "string",
-								"example": "John. Client"
+								"example": "client@invoicey.com"
 							},
 							"birth_date": {
 								"type": "string",
-								"example": "John. Client"
+								"example": "12/11/2022"
 							},
 							"phone": {
 								"type": "string",
@@ -383,7 +374,15 @@
 							"Authorization": "Bearer {Token}"
 						}
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": [
+							"application/json"
+						]
+					}
+				}
 			},
 			"get": {
 				"description": "Get the a single client with the given id",
@@ -396,10 +395,20 @@
 						"in": "query",
 						"required": true,
 						"type": "integer"
+					},
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true,
+						"type": "string"
 					}
 				],
-				"security": {
-					"bearerAuth": []
+				"responses": {
+					"200": {
+						"content": [
+							"application/json"
+						]
+					}
 				}
 
 			}

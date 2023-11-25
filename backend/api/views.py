@@ -1,7 +1,7 @@
 from flask.views import MethodView, View
 from flask import request, current_app, url_for, request
-from users.models import Client, User
-from main import auth
+from users.models import Client, User, Invoice
+from main import auth, db
 import datetime
 
 class MultipleClientDataAPIView(View):
@@ -35,11 +35,11 @@ class ClientDataAPIView(MethodView):
 	decorators = [auth.login_required]
 
 	def get(self):
-		client_id = request.args.get("name")
-		client_id = int(client_id.strip("EP"))
-		client = Client.query.filter_by(name=client_id)
-		if client and client.\
-				client_created_by_me(client_id.pk) and not client.is_deleted:
+		client_id = request.args.get("_id")
+		client_id = int(client_id)
+		client = Client.query.get(client_id)
+		if client and auth.current_user().\
+				client_created_by_me(client_id) and (not client.is_deleted):
 			client_data = {
 				"id": f'EP{client._id}',
 				"name": client.name,
@@ -61,19 +61,20 @@ class ClientDataAPIView(MethodView):
 		}
 		json = request.json
 		if json:
-			user = User.query.filter_by(email=json.get('email')).first()
-			if user:
+			client = Client.query.filter_by(email=json.get('email')).first()
+			if client:
 				client_msg['message'] = "Client with that email already exists"
 				client_msg['created'] = True
 				return client_msg
 			name = json.get('name')
 			email = json.get('email')
 			birth_date = json.get('birth_date')
-			birth_date = datetime.datetime.strptime('%d/%m/%Y')
+			birth_date = datetime.datetime.strptime(birth_date, '%d/%m/%Y')
 			phone = json.get('phone')
 			gender = json.get('gender')
 			client = Client(name=name, email=email,
-						birth_date=birth_date, phone=phone, gender=gender)
+						birth_date=birth_date, phone=phone, gender=gender,
+						user=auth.current_user())
 			db.session.add(client)
 			db.session.commit()
 			client_msg['valid'] = True
@@ -84,8 +85,9 @@ class ClientDataAPIView(MethodView):
 	def delete(self):
 		client_id = request.args.get('id')
 		client_id = client_id.strip("EP")
+		current_user = auth.current_user()
 		client = Client.query.get(client_id)
-		if client and client.client_created_by_me(client_id.pk)\
+		if client and current_user.client_created_by_me(client_id.pk)\
 				and not client.is_deleted:
 			client.is_deleted = True
 			db.session.add(client)
@@ -107,7 +109,7 @@ class InvoiceDataAPIView(MethodView):
 	def get(self):
 		name = request.args.get('trsc_id')
 		if name:
-			invoice = Invoice.query.filter_by(trsc_id=trsc_id).first()
+			invoice = Invoice.query.filter_by(trsc_id=name).first()
 			if invoice and invoice:
 				pass
 	def delete(self):

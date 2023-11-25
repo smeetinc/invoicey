@@ -1,7 +1,6 @@
 from flask_httpauth import HTTPTokenAuth
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from flask_mail import Mail
 from flask_cors import CORS
 from flask import Flask
@@ -22,7 +21,6 @@ ALLOWED_ORGINS = [
 
 
 auth = HTTPTokenAuth(scheme="Bearer")
-login_manager = LoginManager()
 db = SQLAlchemy()
 cors = CORS()
 mail = Mail()
@@ -33,8 +31,6 @@ swagger = get_swaggerui_blueprint(
         'app_name': "Invoicey Application API"
     }
 )
-login_manager.login_message = "User Logged in successfully"
-login_manager.login_message_category = "success"
 def create_app():
     """\
         A function that creates the application instance
@@ -45,8 +41,7 @@ def create_app():
     db.init_app(app)
     mail.init_app(app)
     cors.init_app(app, origins="*", supports_credentials=True,
-                  methods=['POST', 'GET', 'DELETE', 'PUT'])
-    login_manager.init_app(app)
+                  methods=['POST', 'GET', 'DELETE', 'PUT', 'PATCH'])
 
     from users import users
     from base import base
@@ -71,9 +66,10 @@ def verify_token(token: str):
     """
         An function that validates auth token
     """
-    token = User.decode_jwt_token(token)
-    _id = token.get("id")
-    if _id:
-        user = User.query.get(_id)
-        if user:
-            return User
+    token = User.decode_jwt_token(token) if token else None
+    if token:
+        _id = token.get("id")
+        if _id:
+            user = User.query.get(_id)
+            if user and user.is_activated:
+                return user
