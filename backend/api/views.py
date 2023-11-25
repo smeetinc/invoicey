@@ -196,3 +196,17 @@ class MultipleInvoiceDataAPIView(View):
 			"message": "clients not found",
 			"status": "error",
 		}
+
+
+class BankAPIView(MethodView):
+	init_every_request = True
+	decorators = [auth.login_required]
+	
+	def get(self):
+		pass
+	def post(self):
+		pass
+	def put(self):
+		pass
+	def delete(self):
+		pass

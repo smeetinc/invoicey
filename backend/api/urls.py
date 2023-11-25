@@ -2,7 +2,7 @@ from flask import jsonify, make_response, url_for, request, current_app, render_
 from users.models import User, Invoice, Client, Business
 from utils import smtnb, send_mail_text, send_mail
 from main import db, auth
-from .views import ClientDataAPIView, MultipleClientDataAPIView
+from .views import ClientDataAPIView, MultipleClientDataAPIView, BankAPIView
 from . import api
 import jwt
 import datetime
@@ -11,8 +11,11 @@ import datetime
 
 # class based urls
 api.add_url_rule('/clients/', view_func=ClientDataAPIView.as_view('client'))
-api.add_url_rule('/all-client-data/', view_func=MultipleClientDataAPIView.as_view('multiple_client'))
+api.add_url_rule('/all-client-data/',
+				 view_func=MultipleClientDataAPIView.as_view('multiple_client'))
+api.add_url_rule('/bank/', view_func=BankAPIView.as_view('bank_acct'))
 
+# function based view
 @api.post('/authenticate/')
 def authenticate():
 	print(request.is_json)
