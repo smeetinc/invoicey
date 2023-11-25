@@ -27,6 +27,7 @@ class User(db.Model, BaseMixin):
     clients = db.relationship("Client", backref='user', lazy=True)
     invoices = db.relationship("Invoice", backref="user", lazy=True)
     password = db.Column(db.Text, nullable=False)
+    bank = db.relationship("MerchantBankAccount", backref="merchant", uselist=False)
     is_activated = db.Column(db.Boolean, default=False)
 
     @staticmethod
@@ -110,3 +111,13 @@ class Transaction(db.Model, BaseMixin):
     trsc_id = db.Column(db.Integer, unique=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices._id'))
     client_id = db.Column(db.Integer, db.ForeignKey('clients._id'))
+
+class MerchantBankAccount(db.Model, BaseMixin):
+    __tablename__ = "merchant_bank_account"
+    acct_num = db.Column(db.String(10), nullable=False)
+    first_name = db.Column(db.String(120), nullable=False)
+    last_name = db.Column(db.String(120), nullable=False)
+    other_name = db.Column(db.String(120))
+    bank_name = db.Column(db.String(80), nullable=False)
+    bank_code = db.Column(db.Integer)
+    merchant_id = db.Column(db.Integer, db.ForeignKey('users._id'))
