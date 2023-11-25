@@ -94,6 +94,19 @@ def signup():
 		return register_message
 	return register_message
 
+@api.post("/users/resend-creation-link/")
+def resend_creation_link():
+	json = request.get_json()
+	user = User.query.filter_by(email=json.get('email')).first()
+	if user:
+		subject = "Verify Your Invoicy Account"
+		html = render("mail/creation_verify.html", token=token, user=user)
+		smtnb(subject, recipients=[email], html=html)
+	return {
+		"message": "If you have an account with us you'll receive and email",
+		"status": "success"
+	}
+
 @api.post("/users/activate/<string:token>/")
 def activate_user(token: str):
 	try:
