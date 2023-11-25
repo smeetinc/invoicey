@@ -1,6 +1,7 @@
 from flask_httpauth import HTTPTokenAuth
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_mail import Mail
 from flask_cors import CORS
 from flask import Flask
@@ -24,6 +25,7 @@ auth = HTTPTokenAuth(scheme="Bearer")
 db = SQLAlchemy()
 cors = CORS()
 mail = Mail()
+migrate = Migrate()
 swagger = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -43,6 +45,7 @@ def create_app():
     ctx.push()
     db.create_all()
     mail.init_app(app)
+    migrate.init_app(app, db=db)
     cors.init_app(app, origins="*", supports_credentials=True,
                   methods=['POST', 'GET', 'DELETE', 'PUT', 'PATCH'])
 
