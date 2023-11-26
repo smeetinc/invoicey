@@ -901,6 +901,37 @@
 					}
 				}
 			}
+		},
+		"/api/get-user-data/": {
+			"get": {
+				"description": "Gets the authenticated user data",
+				"tags":[
+					"Users"
+				],
+				"parameters":[
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required":true,
+						"type":"string"
+					}
+				],
+				"responses":{
+					"200":{
+						"description": "OK",
+						"summary": "returns the current user data",
+						"content":{
+							"application/json":{
+								
+							}
+						}
+
+					},
+					"401":{
+
+					}
+				}
+			}
 		}
 	}
 }
