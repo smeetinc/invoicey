@@ -261,6 +261,20 @@ def activate_required():
 		"status": "success",
 	}
 
+@api.post("/get-user-data/")
+@auth.login_required
+def get_user_data():
+	user = auth.current_user()
+	data = {
+		"name": user.name,
+		"first_name": user.first_name,
+		"last_name": user.last_name,
+		"birth_date": user.birth_date.strftime("%d/%m/%Y"),
+		"email": user.email,
+		"business_name": user.business.name
+	}
+	return data
+
 @api.app_errorhandler(500)
 def internal_error(e):
 	return {
