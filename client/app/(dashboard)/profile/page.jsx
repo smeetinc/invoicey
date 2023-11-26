@@ -41,10 +41,10 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
     };
     try {
       const token = localStorage.getItem("invc");
-
+      const jsonData = JSON.stringify(data);
       const res = await axios.post(
         "https://olatidejosepha.pythonanywhere.com/api/bank/",
-        JSON.stringify(data),
+        jsonData,
         {
           headers: {
             Authorization: `Bearer ${token}`,

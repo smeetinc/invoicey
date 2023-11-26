@@ -13,7 +13,16 @@ const AddClientModal = ({ isOpen, closeModal }) => {
     reset,
     formState: { errors },
   } = useForm({ resolver: zodResolver(clientSchema) });
-  const submitHandler = (data) => {
+  const submitHandler = async (data) => {
+    try {
+      const mainData = {
+        name: data.clientName,
+        email: data.email,
+        birth_date: data.birthday,
+        phone: data.phoneNumber,
+        gender: data.gender === "Male" ? "M" : "F",
+      };
+    } catch (error) {}
     reset();
   };
   const resetAndCloseModal = () => {
