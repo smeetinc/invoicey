@@ -16,21 +16,22 @@ function signup() {
   const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  {
+    /*useEffect(() => {
     // Fetch CSRF token when the component mounts
     async function fetchCsrfToken() {
       try {
         const response = await axios.get(
-          "http://olatidejosepha.pythonanywhere.com/",
+          "https://olatidejosepha.pythonanywhere.com/",
           {
             headers: {
-              "is-from-site": "x-token-value",
+              Authorization: "Authorization",
             },
           }
         );
         console.log(response);
 
-        setCsrfToken(response.data.csrf_token);
+        setCsrfToken(response.data.refresh_token);
       } catch (error) {
         console.error("Error fetching CSRF token:", error);
         // Handle error accordingly
@@ -39,7 +40,8 @@ function signup() {
     }
 
     fetchCsrfToken();
-  }, []);
+  }, []); */
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -50,23 +52,8 @@ function signup() {
     const email = emailAddress.trim();
     const pwd = password.trim();
     const conpwd = conPassword.trim();
-    if (!fullname || !businessname || !email || !pwd || !conpwd) {
-      alert("All fields are required");
-      setIsLoading(false);
-      return;
-    }
-    if (pwd.length < 6) {
-      alert("Password must be at least 6 characters long");
-      setIsLoading(false);
-      return;
-    }
-    if (pwd !== conpwd) {
-      alert("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
 
-    // Include CSRF token in the form data
+    // Include CSRF token in the form data (if needed)
     const formData = {
       email: email,
       name: fullname,
@@ -75,42 +62,35 @@ function signup() {
     };
 
     const jsonData = JSON.stringify(formData);
-    console.log(csrfToken);
 
-    // Make the POST request with Axios
-    axios.defaults.headers.common["X-Token"] = csrfToken;
     try {
+      console.log("Sending POST request...");
       const response = await axios.post(
-        "http://olatidejosepha.pythonanywhere.com/api/register-user/", // Replace with your actual Flask backend URL
+        "http://olatidejosepha.pythonanywhere.com/api/register-user/",
         jsonData,
         {
           headers: {
             "Content-Type": "application/json",
-            "X-Token": csrfToken,
           },
-          withCredentials: true,
         }
       );
 
-      const responseData = response.data;
-
-      // Handle success response
-      console.log(responseData);
+      console.log("Response from server:", response.data);
       window.location.href = "/"; // Redirect to a success page or handle accordingly
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
+        console.log("Response data:", error.response.data);
+        console.log("Status code:", error.response.status);
+        console.log("Headers:", error.response.headers);
       } else if (axios.isCancel(error)) {
         // Handle canceled request
         console.log("Request canceled", error.message);
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.log("Error", error.message);
+        console.log("Error message:", error.message);
       }
       setIsLoading(false);
     }
