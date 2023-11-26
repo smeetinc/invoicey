@@ -108,9 +108,6 @@ function overview() {
 
   return (
     <div className="flex">
-      {/*----Nav start ----*/}
-      <div className="w-96">Nav here</div>
-      {/*----Nav ends ----*/}
       {/*----Main screen for overview here ----*/}
       <div className="w-full px-8">
         <div className="flex flex-row-reverse gap-1 border-b-2 w-full py-4">
