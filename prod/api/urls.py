@@ -2,7 +2,8 @@ from flask import jsonify, make_response, url_for, request, current_app, render_
 from users.models import User, Invoice, Client, Business
 from utils import smtnb, send_mail_text, send_mail
 from main import db, auth
-from .views import ClientDataAPIView, MultipleClientDataAPIView
+from .views import (ClientDataAPIView, MultipleClientDataAPIView,
+					BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
 from . import api
 import jwt
 import datetime
@@ -11,18 +12,25 @@ import datetime
 
 # class based urls
 api.add_url_rule('/clients/', view_func=ClientDataAPIView.as_view('client'))
-api.add_url_rule('/all-client-data/', view_func=MultipleClientDataAPIView.as_view('multiple_client'))
+api.add_url_rule('/all-client-data/',
+				 view_func=MultipleClientDataAPIView.as_view('multiple_client'))
+api.add_url_rule('/invoice/', view_func=InvoiceDataAPIView.as_view('invoice'))
+api.add_url_rule('/multi/invoice/', view_func=MultipleInvoiceDataAPIView.as_view('multi_invoice'))
+api.add_url_rule('/bank/', view_func=BankAPIView.as_view('bank_acct'))
 
+# function based view
 @api.post('/authenticate/')
 def authenticate():
-	print(request.is_json)
+
 	json = request.get_json()
 	auth_message = {
 		"valid": False,
 		"message": 'User Not Found',
 		"level": 'NOTSET',
 		"authenticated": False,
-		"data": False
+		"data": False,
+		"refresh_token": "",
+		"is_activated": "False"
 	}
 	if json:
 		email = json.get('email')
@@ -32,21 +40,20 @@ def authenticate():
 		print(user)
 		if user and user.check_hash(password):
 			if not user.is_deleted:
+				#creates refresh token
+				refresh_token = user.encode_id()
+				auth_message['refresh_token'] = refresh_token
+				auth_message['is_activated'] = user.is_activated
+				auth_message['data'] = bool(json)
 				if user.is_activated:
-					#creates the refresh token to be remembered
-					refresh_token = user.encode_id()
 					#after token created
 					auth_message['valid'] = True
 					auth_message['message'] = 'User logged in successfully'
 					auth_message['level'] = 'success'
-					auth_message['authenticated'] = False
-					auth_message['data'] = bool(json)
-					auth_message['refresh_token'] = refresh_token
 					return auth_message
 				auth_message['valid'] = True
 				auth_message['message'] = "Account is not activated please check your email to activate"
 				auth_message['level'] = "warning"
-				auth_message['data'] = bool(json)
 				return auth_message
 		auth_message['message'] = 'Invalid Credentials'
 		auth_message['level'] = 'warning'
@@ -71,23 +78,43 @@ def signup():
 			busi_nm = json.get("busi_name")
 			password = json.get("password")
 			hashed = User.generate_hash(password)
-			first, last = name.split()
-			user = User(first_name=first, last_name=last, password=hashed, email=email, name=name)
-			business = Business(name=busi_nm, merchant=user)
-			db.session.add_all([user, business])
-			db.session.commit()
-			register_message['created'] = True
-			register_message['message'] = "User created please check your email for validation"
-			register_message['status'] = "success"
-			token = user.encode_id()
-			subject = "verify your email address"
-			message = render("mail/creation_verify.html", token=token, user=user)
-			smtnb(subject, message, recipients=[email])
-			return register_message, 201
+			li_name = name.split()
+			if len(li_name) == 2:
+				first, last = li_name[0], li_name[1]
+				user = User(first_name=first, last_name=last, password=hashed,
+				email=email, name=name)
+				business = Business(name=busi_nm, merchant=user)
+				db.session.add_all([user, business])
+				db.session.commit()
+				register_message['created'] = True
+				register_message['message'] = "User created please check your email for validation"
+				register_message['status'] = "success"
+				token = user.encode_id()
+				subject = "Verify Your Invoicy Account"
+				html = render("mail/creation_verify.html", token=token, user=user)
+				smtnb(subject, recipients=[email], html=html)
+				return register_message, 201
+			register_message["message"] = "You can only pass in First and Last Name"
+			return register_message
 		register_message['created'] = True
 		register_message['message'] = "User already exists"
 		return register_message
 	return register_message
+
+@api.post("/users/resend-activation-link/")
+def resend_creation_link():
+	json = request.get_json()
+	email = json.get('email')
+	user = User.query.filter_by(email=email).first()
+	if user:
+		token = user.encode_id()
+		subject = "Verify Your Invoicy Account"
+		html = render("mail/creation_verify.html", token=token, user=user)
+		smtnb(subject, recipients=[email], html=html)
+	return {
+		"message": "If you have an account with us you'll receive and email",
+		"status": "success"
+	}
 
 @api.post("/users/activate/<string:token>/")
 def activate_user(token: str):
@@ -134,8 +161,8 @@ def reset_password():
 				token = user.encode_id()
 				if token:
 					subject = "Reset Password Token"
-					message = render("mail/creation_verify.html", token=token, user=user)
-					smtnb(subject, message, recipients=[email])
+					html = render("mail/merchant_reset.html", token=token, user=user)
+					smtnb(subject, recipients=[email], html=html)
 					return {
 						"status": "success",
 						"message": "Mail sent !",
@@ -171,6 +198,7 @@ def verify_reset(token: str, _id: int):
 			db.session.commit()
 			data['message'] = "Validated"
 			return data
+		
 @api.get('/overview-data/')
 @auth.login_required
 def overview():
@@ -201,24 +229,37 @@ def invoices():
 	pinvoices = Invoice.query.order_by(Invoice.has_paid.asc()).\
 				paginate(page=page, per_page=per_page)
 	invoices = pinvoices.items
-	total = pinvoices.total
+	total = 0
 	data = {
 		"invoices": [
 			{
 				'trsc_id': invoice.trsc_id,
 				'client_name': invoice.client.name,
 				'type': invoice.payment_type,
-				'ref_id': invoice.ref,
+				'ref_id': invoice.ref_id,
+				'inv_id': invoice.inv_id,
 				'amt': invoice.amount,
 				'has_paid': invoice.has_paid,
-			} for invoice in invoices
+				'py_type': invoice.payment_type,
+			} for invoice in invoices if invoice.user.name == auth.current_user().name
 		],
 		"has_next": pinvoices.has_next,
 		"has_prev": pinvoices.has_prev,
-		"total": total,
 	}
+	data['total'] = len(data['invoices'])
 	return data
 
+@api.post("/activate_required/")
+@auth.login_required
+def activate_required():
+	user = auth.current_user()
+	user.is_activated = True
+	db.session.add(user)
+	db.session.commit()
+	return {
+		"message": "User Account Activated",
+		"status": "success",
+	}
 
 @api.app_errorhandler(500)
 def internal_error(e):
@@ -228,35 +269,36 @@ def internal_error(e):
 	}, 500
 
 @api.app_errorhandler(404)
-def internal_error(e):
+def not_found(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 404
 
 @api.app_errorhandler(403)
-def internal_error(e):
+def forbidden(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 403
 
 @api.app_errorhandler(401)
-def internal_error(e):
+def unauthorized(e):
 	return {
 		"message": e.name,
 		"code": e.code,
+		"description": e.description,
 	}, 401
 
 @api.app_errorhandler(502)
-def internal_error(e):
+def bad_gateway(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 502
 
 # @api.app_errorhandler(400)
-# def internal_error(e):
+# def bad_request(e):
 # 	return {
 # 		"message": e.nam
 # 		"code": e.code,

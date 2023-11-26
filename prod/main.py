@@ -1,11 +1,12 @@
 from flask_httpauth import HTTPTokenAuth
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_mail import Mail
 from flask_cors import CORS
-from flask import Flask
+from flask import Flask, request, abort
 from utils import Config, DevelopmentConfig
-
+import jwt
 
 
 SWAGGER_URL = '/api-docs'
@@ -24,6 +25,7 @@ auth = HTTPTokenAuth(scheme="Bearer")
 db = SQLAlchemy()
 cors = CORS()
 mail = Mail()
+migrate = Migrate()
 swagger = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
@@ -43,6 +45,7 @@ def create_app():
     ctx.push()
     db.create_all()
     mail.init_app(app)
+    migrate.init_app(app, db=db)
     cors.init_app(app, origins="*", supports_credentials=True,
                   methods=['POST', 'GET', 'DELETE', 'PUT', 'PATCH'])
 
@@ -70,10 +73,21 @@ def verify_token(token: str):
     """
         An function that validates auth token
     """
-    token = User.decode_jwt_token(token) if token else None
-    if token:
-        _id = token.get("id")
-        if _id:
-            user = User.query.get(_id)
-            if user and user.is_activated:
-                return user
+    try:
+        token = User.decode_jwt_token(token) if token else None
+        if token:
+            _id = token.get("id")
+            if _id:
+                user = User.query.get(_id)
+                allowed_view = ['api.overview']
+                h = (request.headers.get("Activated") == 'ccrf')\
+                    and request.endpoint in allowed_view
+                s = request.endpoint == "api.activate_required"
+                if (user and user.is_activated) or (user and h) or s:
+                    return user
+    except jwt.ExpiredSignatureError:
+        abort(401, "Token Signature Expired")
+    except jwt.InvalidTokenError:
+        abort(401, "Invalid Passed In Token")
+    except:
+        pass

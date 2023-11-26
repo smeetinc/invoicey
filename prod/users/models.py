@@ -27,6 +27,7 @@ class User(db.Model, BaseMixin):
     clients = db.relationship("Client", backref='user', lazy=True)
     invoices = db.relationship("Invoice", backref="user", lazy=True)
     password = db.Column(db.Text, nullable=False)
+    bank = db.relationship("MerchantBankAccount", backref="merchant", uselist=False)
     is_activated = db.Column(db.Boolean, default=False)
 
     @staticmethod
@@ -82,11 +83,11 @@ class Business(db.Model, BaseMixin):
 class Client(db.Model, BaseMixin):
     __tablename__ = "clients"
     name = db.Column(db.String(120), unique=False, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=False, nullable=False)
     birth_date = db.Column(db.Date)
     gender = db.Column(db.String(1))
     phone = db.Column(db.String(13))
-    user_id = db.Column(db.Integer, db.ForeignKey("users._id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users._id"), nullable=False)
     invoices = db.relationship("Invoice", backref="client", lazy=True)
 
 class Invoice(db.Model, BaseMixin):
@@ -110,3 +111,38 @@ class Transaction(db.Model, BaseMixin):
     trsc_id = db.Column(db.Integer, unique=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices._id'))
     client_id = db.Column(db.Integer, db.ForeignKey('clients._id'))
+
+class MerchantBankAccount(db.Model, BaseMixin):
+    __tablename__ = "merchant_bank_account"
+    acct_num = db.Column(db.String(10), nullable=False)
+    first_name = db.Column(db.String(120), nullable=False)
+    last_name = db.Column(db.String(120), nullable=False)
+    acct_name = db.Column(db.String(150), nullable=False)
+    other_name = db.Column(db.String(120))
+    bank_name = db.Column(db.String(80), nullable=False)
+    bank_code = db.Column(db.Integer)
+    merchant_id = db.Column(db.Integer, db.ForeignKey('users._id'))
+
+class Banks(db.Model, BaseMixin):
+    __tablename__ = 'banks'
+    name = db.Column(db.String(80))
+    bank_code = db.Column(db.Integer)
+
+    @classmethod
+    def store_banks_fresh(cls):
+        """\
+            Stores multiple banks data from nubapi
+        """
+        import requests
+        resp = requests.get("https://nubapi.com/banks")
+        json = resp.json()
+        items = json.items()
+        unused = [
+
+        ]
+        for code, bank in items:
+            unused.append(cls(name=bank, bank_code=code))
+        db.session.add_all(unused)
+        db.session.commit()
+        return True
+        from urllib import request

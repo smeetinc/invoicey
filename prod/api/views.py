@@ -1,7 +1,7 @@
 from flask.views import MethodView, View
 from flask import request, current_app, url_for, request, render_template as render
-from users.models import Client, User, Invoice
-from utils import send_mail_text_nonblocking as smtnb
+from users.models import Client, User, Invoice, MerchantBankAccount
+from utils import smtnb, create_sub_account
 from main import auth, db
 import datetime
 import secrets
@@ -24,12 +24,12 @@ class MultipleClientDataAPIView(View):
 					"phone": client.phone,
 					"birth_date": client.birth_date.strftime("%d/%m/%Y"),
 					"gender": client.gender,
-				} for client in pclients.items
+				} for client in pclients.items if not client.is_deleted
 			],
 			"has_next": pclients.has_next,
 			"has_prev": pclients.has_prev,
-			"total": pclients.total,
 		}
+		data['total'] = len(data['clients'])
 		return data
 
 class ClientDataAPIView(MethodView):
@@ -63,10 +63,11 @@ class ClientDataAPIView(MethodView):
 		}
 		json = request.json
 		if json:
-			client = Client.query.filter_by(email=json.get('email')).first()
-			if client:
-				client_msg['message'] = "Client with that email already exists"
-				client_msg['created'] = True
+			client = Client.query.filter_by(phone=json.get('phone')).first()
+			if client and client.user.business.\
+				name == auth.current_user().business.name:
+				client_msg['message'] = "Client with that phone already exists"
+				client_msg['created'] = False
 				return client_msg
 			name = json.get('name')
 			email = json.get('email')
@@ -85,7 +86,7 @@ class ClientDataAPIView(MethodView):
 		return client_msg
 
 	def delete(self):
-		client_id = request.args.get('id', type=int)
+		client_id = request.args.get('_id', type=int)
 		current_user = auth.current_user()
 		client = Client.query.get(client_id)
 		if client and current_user.client_created_by_me(client.pk)\
@@ -108,31 +109,47 @@ class InvoiceDataAPIView(MethodView):
 	decorators = [auth.login_required]
 
 	def get(self):
-		client_name = request.args.get("client_name")
-		client = Client.query.filter_by(name=client_name).first()
-		if client and not client.is_deleted:
-			invoice = Invoice.query.filter_by(inv_id=name).last()
-			if invoice and not invoice.is_deleted:
+		inv_id = request.args.get("inv_id")
+		invoice = Invoice.query.filter_by(inv_id=inv_id).first()
+		if invoice and not invoice.is_deleted:
+				client = invoice.client
+				if client and not client.is_deleted:
+					return {
+						"inv_id": invoice.inv_id,
+						"product_name": invoice.product,
+						"description": invoice.description,
+						"client_name": invoice.name,
+						"amount": invoice.amount,
+						"has_paid": invoice.has_paid,
+						"due_date": invoice.due_date.strftime("%d/%m/%Y"),
+						"pay_type": invoice.payment_type,
+					}
+		return {
+			"message": "invoice not found",
+			"valid": False
+		}
+	
+	def delete(self):
+		json = request.get_json()
+		if json:
+			inv_id = json.get('inv_id')
+			invoice = Invoice.query.filter_by(inv_id=inv_id).first()
+			if invoice and auth.current_user().invoice_created_by_me(invoice.pk):
+				invoice.is_deleted = True
+				db.session.add(invoice)
+				db.session.commit()
 				return {
-					"inv_id": invoice.inv_id,
-					"product_name": invoice.product,
-					"description": invoice.description,
-					"client_name": client_name,
-					"amount": client.amount,
-					"has_paid": client.has_paid,
-					"due_date": client.due_date.strftime("%d/%m/%Y"),
-					"pay_type": client.payment_type,
+					"message": "Invoice deleted",
+					"status": "success"
 				}
 			return {
-				"message": "invoice not found",
-				"valid": False
+				"message": "Invoice not found",
+				"status": "error"
 			}
 		return {
-			"message": "client passed in is not found",
-			"valid": False,
+			"message": "Data Not Received",
+			"status": "error"
 		}
-	def delete(self):
-		pass
 	def post(self):
 		data = request.get_json()
 		if data:
@@ -141,7 +158,7 @@ class InvoiceDataAPIView(MethodView):
 			product_name = data.get("product_name")
 			description = data.get("description")
 			client_name = data.get("client_name")
-			amount = data.get("amt")
+			amount = data.get("amount")
 			has_paid = data.get("has_paid")
 			py_type = data.get("py_type")
 			due_date = datetime.datetime.strptime(data.get("due_date"), "%d/%m/%Y")
@@ -156,8 +173,8 @@ class InvoiceDataAPIView(MethodView):
 				db.session.commit()
 				#send a nonblocking io mail
 				smtnb(f"Invoice Notification for {inv_id}",
-					render("pay_invoice.html", invoice=invoice, client=client),
-					recipients=[client.email])
+					recipients=[client.email],
+					html=render("mail/pay_invoice.html", invoice=invoice, client=client))
 				return {
 					"message": "invoice created",
 					"status": "success"
@@ -197,3 +214,74 @@ class MultipleInvoiceDataAPIView(View):
 			"message": "clients not found",
 			"status": "error",
 		}
+
+
+class BankAPIView(MethodView):
+	init_every_request = True
+	decorators = [auth.login_required]
+	
+	def get(self):
+		user = auth.current_user()
+		if user.bank and not user.bank.is_deleted:
+			return {
+				"acct_num": user.bank.acct_num,
+				"bank_name": user.bank.bank_name,
+				"bank_code": user.bank.bank_code,
+				"acct_name": user.bank.acct_name,
+				"first_name": user.bank.first_name,
+				"last_name": user.bank.last_name,
+				"status": "success",
+				"message": "Merchant Bank"
+			}
+		return {
+			"message": "Merchant bank haven't been created",
+			"status": "error"
+		}
+	
+	def post(self):
+		json = request.get_json(cache=False)
+		user = auth.current_user()
+		if json:
+			acct_num = json.get("acct_num")
+			bank_name = json.get("bank_name")
+			acct_name = json.get("acct_name")
+			bank_code = json.get("bank_code", type=int),
+			first = json.get("first_name")
+			last = json.get("last_name")
+			other = json.get("other")
+			if acct_num and bank_name and acct_name and first and last:
+				data = {
+					"account_number": str(acct_num),
+					"business_name": user.business.name,
+					"settlement_bank": str(bank_code),
+					"percentage_charge": 10
+				}
+				bank_account = MerchantBankAccount(acct_num=str(acct_num),
+									   bank_name=bank_name, first_name=first,
+									   last_name=last, other=other,
+									   merchant=user, acct_name=acct_name,
+									   bank_code=bank_code)
+				resp = create_sub_account(data)
+				if resp.get('status'):
+					db.session.add(bank_account)
+					db.session.commit()
+					return {
+						"message": "Account number added",
+						"status": "success",
+					}
+				return {
+					"message": "Sorry an error occured",
+					"status": "error"
+				}
+			return {
+				"message": "Incomplete data resources",
+				"status": "error"
+			}
+		return {
+			"message": "Json not received",
+			"status": "error"
+		}
+	def put(self):
+		pass
+	def delete(self):
+		pass

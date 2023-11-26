@@ -15,3 +15,14 @@ try:
 	print(resp.json())
 except requests.exceptions.RequestException as e:
 	print("* Request Error")
+
+
+def create_sub_account(data):
+	"""\
+		A function that creates a sub account for a user
+	"""
+	JSON = json.dumps(data)
+	resp = requests.post("https://api.paystack.co/subaccount", data=JSON, headers=headers)
+	json_resp = resp.json()
+	if json_resp:
+		json_resp

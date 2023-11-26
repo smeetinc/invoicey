@@ -17,6 +17,10 @@
 		{
 			"name": "Invoices",
 			"description": "The invoices application endpoints"
+		},
+		{
+			"name": "Payments",
+			"description": "Contains Payments "
 		}
 	],
 	"basePath": "/",
@@ -108,6 +112,10 @@
 									"type": "object",
 									"description": "If posted data is oks",
 									"items": {
+										"data": {
+											"type": "boolean",
+											"example": true
+										},
 										"refresh_token": {
 											"type": "string",
 											"example": "jwt"
@@ -123,6 +131,46 @@
 										"level": {
 											"type": "string",
 											"example": "NOTSET"
+										},
+										"is_activated": {
+											"type": "boolean",
+											"example": false
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"description": "Not Authorzed Request",
+									"items": {
+									    "authenticated":{
+									    	"type": "boolean",
+									    	"example": false
+										},
+									    "data": {
+									    	"type": "boolean",
+									    	"example": false
+									    },
+										"level": {
+											"type": "string",
+											"example": "warning"
+										},
+										"message": {
+											"type": "string",
+											"example": "Invalid credentials"
+										},
+										"refresh_token": {
+											"type": "string"
+										},
+										"valid": {
+											"type": "boolean",
+											"example": false
 										}
 									}
 								}
@@ -141,16 +189,19 @@
 						"in": "header",
 						"required": true,
 						"type": "string",
-						"description": "Required header to validate",
-						"properties": {
-							"Authorization": "Bearer {Token}"
-						}
+						"description": "Required header to validate"
+					},
+					{
+						"name": "Activated",
+						"in": "header",
+						"required":false,
+						"type":"string"
 					}
 				],
 				"responses": {
 					"200": {
 						"content": [
-							"application/json",
+							"application/json"
 						]
 					}
 				}
@@ -282,7 +333,7 @@
 													},
 													"birth_date": {
 														"type": "string",
-														"example": "dd/mm/yy"
+														"example": "dd/mm/yyyy"
 													},
 													"gender": {
 														"type": "string",
@@ -321,7 +372,15 @@
 							"Authorization": "Bearer {Token}"
 						}
 					}
-				]
+				],
+				"responses": {
+					"200": {
+						"description": "A Successful Response",
+						"content": [
+							"application/json"
+						]
+					}
+				}
 			}
 		},
 		"/api/users/password-reset/": {
@@ -375,6 +434,17 @@
 			}
 		},
 		"/api/clients/": {
+			"parameters": [
+				{
+					"name": "Authorization",
+					"in": "header",
+					"required": true,
+					"type": "string",
+					"properties": {
+						"Authorization": "Bearer {Token}"
+					}
+				}
+			],
 			"post": {
 				"description": "Creates the clients",
 				"tags": [
@@ -408,15 +478,6 @@
 								"example": "F/M"
 							}
 						}
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"required": true,
-						"type": "string",
-						"properties": {
-							"Authorization": "Bearer {Token}"
-						}
 					}
 				],
 				"responses": {
@@ -439,12 +500,6 @@
 						"in": "query",
 						"required": true,
 						"type": "integer"
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"required": true,
-						"type": "string"
 					}
 				],
 				"responses": {
@@ -455,6 +510,396 @@
 					}
 				}
 
+			},
+			"delete": {
+				"description": "Deletes the client Data",
+				"tags": [
+					"Clients"
+				],
+				"parameters":[
+					{
+						"name":"_id",
+						"in":"query",
+						"required": true,
+						"type": "integer"
+					}
+				],
+				"responses":{
+					"content":[
+						"application/json"
+					]
+				}
+			}
+		},
+		"/api/bank/": {
+			"parameters":[
+				{
+					"name": "Authorization",
+					"in": "header",
+					"required":true,
+					"type":"string"
+				}
+			],
+			"get": {
+				"description": "Get the user or Merchant Bank Accounts",
+				"tags": [
+					"Payments"
+				],
+				"responses":{
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json":{
+								"schema": {
+									"type": {
+										"items": {
+											"type": "object",
+											"properties":{
+												"acct_num":{
+
+												},
+												"bank_name": {
+
+												},
+												"bank_code": {
+
+												},
+												"acct_name": {
+
+												},
+												"first_name": {
+
+												},
+												"last_name": {
+
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"description": "Saves the user bank account details",
+				"tags": [
+					"Payments"
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"required": true,
+						"in": "body",
+						"type": "object",
+						"properties": {
+							"acct_num": {
+								"type":"string"
+							},
+							"bank_name": {
+								"type": "string"
+							},
+							"acct_name": {
+								"type":"string"
+							}, 
+							"bank_code": {
+								"type": "integer"
+							}, 
+							"first_name": {
+								"type": "string"
+							},
+							"last_name": {
+								"type": "string"
+							},
+							"other": {
+								"type": "string"
+							}
+						}
+					}
+				],
+				"responses": {
+					"content": [
+						"application/json"
+					]
+				}
+			},
+			"delete": {
+				"description": "Deletes the user bank account",
+				"tags": [
+					"Payments"
+				],
+				"responses": {
+					"content": {
+						"application/json": {
+
+						}
+					}
+				}
+			}
+		},
+		"/api/activate_required/": {
+			"description": "Activates user based on authorization token",
+			"post": {
+				"tags": [
+					"Users"
+				],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json":{
+								"schema": {
+									"type": "object",
+									"items": {
+										"message": {
+											"type": "string",
+											"example": "User Account Activated"
+										},
+										"status": {
+											"type": "string",
+											"example": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/users/resend-activation-link/":{
+			"post":{
+				"description": "Resends activation link",
+				"tags":[
+					"Users"
+				],
+				"security":[
+					
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties":{
+							"email": {
+								"type":"string",
+								"example":"example@email.com"
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content":{
+							"application/json":{
+
+							}
+						}
+					},
+					"401": {
+						"content": {
+							"application/json": {
+
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/invoice/":{
+			"get": {
+				"tags": [
+					"Invoices"
+				],
+				"description": "Gets a single Invoice passing in as a query param inv_id",
+				"parameters": [
+					{
+						"name":"inv_id",
+						"in": "query",
+						"required":true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Invoices"
+				],
+				"description": "Accepts a json body in the request",
+				"parameters":[
+					{
+						"name": "body",
+						"in":"body",
+						"required": true,
+						"properties":{
+							"product_name": {
+								"type": "string",
+								"example": "Product Name"
+							},
+							"description": {
+								"type": "string",
+								"example": "Product Description"
+							},
+							"client_name": {
+								"type": "string",
+								"example": "Client Full Name"
+							},
+							"amount": {
+								"type": "double",
+								"example": 2000.00
+							},
+							"has_paid": {
+								"type":  "boolean",
+								"example": false
+							},
+							"py_type": {
+								"type": "string",
+								"example": "Payment type"
+							},
+							"due_date": {
+								"type": "string",
+								"example": "dd/mm/yyyy"
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Invoices"
+				],
+				"parameters":[
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"inv_id": {
+								"type": "string",
+								"example": "invoice id"
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					}
+				}
+			},
+			"parameters": [
+				{
+					"name":"Authorization",
+					"in":"header",
+					"required":true
+				}
+			]
+		},
+		"/api/multi/invoices/": {
+			"get":{
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"required": true,
+						"type":"integer"
+					},
+					{
+						"name":"Authorization",
+						"in":"header",
+						"required":true,
+						"type": "integer"
+					}
+				],
+				"description": "Get all clients based on current authenticated user",
+				"tags": [
+					"Invoices"
+				],
+				"responses":{
+					"200":{
+						"description":"OK"
+					},
+					"401": {
+						"description":"Unauthorized"
+					}
+				}
 			}
 		}
 	}
