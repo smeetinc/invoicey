@@ -3,25 +3,44 @@ import { invoiceSchema } from "@/utils/schemas";
 import { Dialog } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
 const AddInvoiceModal = ({ isOpen, closeModal }) => {
-  const {
-    handleSubmit,
-    register,
-    formState: { errors },
-    reset,
-  } = useForm({ resolver: zodResolver(invoiceSchema) });
+  const formRef = useRef(null);
   const [bankList, setBankList] = useState([]);
   const [selectedBankCode, setSelectedBankCode] = useState(null);
   const [accountNumber, setAccountNumber] = useState("");
-  const submitHandler = (data) => {
-    console.log(data);
-    reset();
-  };
+  const [accountDetails, setAccountDetails] = useState("");
   const resetAndCloseModal = () => {
-    reset();
+    formRef.current?.reset();
     closeModal();
   };
+  const submitHandler = (e) => {
+    e.preventDefault();
+    if (!selectedBankCode) {
+      toast.error("Select Your Bank");
+    }
+    if (!accountNumber || accountNumber.trim().length !== 10) {
+      toast.error("Invalid Account Number");
+      return;
+    }
+    if (!accountDetails) {
+      toast.error("Invalid Account Details");
+      return;
+    }
+
+    const data = {
+      account_number: accountNumber,
+      account_name: accountDetails?.account_name,
+      bank_name: accountDetails?.Bank_name,
+      bank_code: selectedBankCode,
+    };
+
+    toast.success("Account Added");
+    resetAndCloseModal();
+  };
+
   useEffect(() => {
     const fetchBanks = async () => {
       try {
@@ -42,24 +61,24 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
   useEffect(() => {
     const controller = new AbortController();
     const getAccountDetails = async () => {
-      console.log(selectedBankCode);
       if (accountNumber.trim().length !== 10) return;
 
-      const res = await fetch(
-        `https://nubapi.com/verify?account_number=${accountNumber}&bank_code=${selectedBankCode}`,
-        {
-          signal: controller.signal,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization:
-              "Bearer 4vvFJ5AkL6QNrFkFtupVzJ1lIvS22vArJkEw1cM3c297bb53",
-          },
-          method: "GET",
-          mode: "no-cors",
-        }
-      );
-      const data = await res.json();
-      console.log(data);
+      try {
+        const res = await axios.get(
+          `https://nubapi.com/api/verify?account_number=${accountNumber}&bank_code=${selectedBankCode}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_NUBAPI_KEY}`,
+            },
+            signal: controller.signal,
+          }
+        );
+        const { data } = res;
+        setAccountDetails(data);
+      } catch (error) {
+        console.log(error, error.message);
+      }
     };
     getAccountDetails();
     return () => controller.abort();
@@ -115,7 +134,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
               </svg>
             </button>
           </Dialog.Title>
-          <form onSubmit={handleSubmit(submitHandler)}>
+          <form onSubmit={submitHandler} ref={formRef}>
             <div className="grid grid-cols-2 gap-8  mb-8">
               <div className="flex flex-col gap-2  ">
                 <label
@@ -165,16 +184,17 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
-                  htmlFor="amount"
+                  htmlFor="account_name"
                   className="text-sm text-dark  font-medium leading-6"
                 >
                   Account Name
                 </label>
                 <input
-                  placeholder="#200,000.00"
-                  name="name"
-                  id="amount"
+                  name="account_name"
+                  id="account_name"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
+                  readOnly
+                  value={accountDetails?.account_name}
                 />
               </div>
             </div>
@@ -201,6 +221,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
   );
 };
 const Profile = () => {
+  const [showAddAccount, SetShowAccount] = useState(false);
   return (
     <>
       <div className="flex items-center gap-4 mb-8">
@@ -245,14 +266,20 @@ const Profile = () => {
               <p className="text-black text-base font-medium leading-8 tracking-wide max-w-[657px] text-center mb-5">
                 No Payment Account Yet
               </p>
-              <button className="text-white bg-primary  font-semibold text-base text-center leading-7 tracking-wide grid place-items-center px-10 py-3  rounded-lg w-fit max-w-[500px]">
+              <button
+                className="text-white bg-primary  font-semibold text-base text-center leading-7 tracking-wide grid place-items-center px-10 py-3  rounded-lg w-fit max-w-[500px]"
+                onClick={() => SetShowAccount(true)}
+              >
                 Add Payment Account
               </button>
             </div>
           </div>
         </div>
       </section>
-      <AddInvoiceModal closeModal={() => {}} isOpen={true} />
+      <AddInvoiceModal
+        closeModal={() => SetShowAccount(false)}
+        isOpen={showAddAccount}
+      />
     </>
   );
 };

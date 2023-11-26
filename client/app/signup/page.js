@@ -74,20 +74,10 @@ function signup() {
     };
 
     const jsonData = JSON.stringify(formData);
-    console.log(csrfToken);
 
     // Make the POST request with Axios
     // axios.defaults.headers.common["X-Token"] = csrfToken;
     try {
-      const tokenRes = await fetch(
-        "http://olatidejosepha.pythonanywhere.com/",
-        {
-          headers: {
-            "is-from-site": "x-token-value",
-          },
-        }
-      );
-      const token = await tokenRes.json();
       // const response = await axios.post(
       //   "http://olatidejosepha.pythonanywhere.com/api/register-user/", // Replace with your actual Flask backend URL
       //   jsonData,
@@ -99,7 +89,7 @@ function signup() {
       //     withCredentials: true,
       //   }
       // );
-      console.log(token);
+
       const res = await fetch(
         "http://olatidejosepha.pythonanywhere.com/api/register-user/",
         {
@@ -107,7 +97,6 @@ function signup() {
           body: jsonData,
           headers: {
             "Content-Type": "application/json",
-            "x-Token": token.csrf_token,
           },
           credentials: "include",
         }
@@ -115,7 +104,7 @@ function signup() {
       const responseData = await res.json();
 
       console.log(responseData);
-      window.location.href = "/"; // Redirect to a success page or handle accordingly
+      // Redirect to a success page or handle accordingly
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {
