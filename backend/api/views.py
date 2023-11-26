@@ -255,7 +255,7 @@ class BankAPIView(MethodView):
 					data = {
 						"account_number": str(acct_num),
 						"business_name": user.business.name,
-						"settlement_bank": str(bank_code),
+						"settlement_bank": f"{bank_code}",
 						"percentage_charge": 10
 					}
 					bank_account = MerchantBankAccount(acct_num=str(acct_num),

@@ -24,5 +24,4 @@ def create_sub_account(data):
 	JSON = json.dumps(data)
 	resp = requests.post("https://api.paystack.co/subaccount", data=JSON, headers=headers)
 	json_resp = resp.json()
-	if json_resp:
-		json_resp
+	json_resp
