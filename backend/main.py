@@ -82,7 +82,8 @@ def verify_token(token: str):
                 allowed_view = ['api.overview']
                 h = (request.headers.get("Activated") == 'ccrf')\
                     and request.endpoint in allowed_view
-                if (user and user.is_activated) or (user and h):
+                s = request.endpoint == "api.activate_required"
+                if (user and user.is_activated) or (user and h) or s:
                     return user
     except jwt.ExpiredSignatureError:
         abort(401, "Token Signature Expired")

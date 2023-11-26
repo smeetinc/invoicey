@@ -189,10 +189,13 @@
 						"in": "header",
 						"required": true,
 						"type": "string",
-						"description": "Required header to validate",
-						"properties": {
-							"Authorization": "Bearer {Token}"
-						}
+						"description": "Required header to validate"
+					},
+					{
+						"name": "Activated",
+						"in": "header",
+						"required":false,
+						"type":"string"
 					}
 				],
 				"responses": {
@@ -543,15 +546,77 @@
 					"Payments"
 				],
 				"responses":{
-					"content": [
-						"application/json"
-					]
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json":{
+								"schema": {
+									"type": {
+										"items": {
+											"type": "object",
+											"properties":{
+												"acct_num":{
+
+												},
+												"bank_name": {
+
+												},
+												"bank_code": {
+
+												},
+												"acct_name": {
+
+												},
+												"first_name": {
+
+												},
+												"last_name": {
+
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 			},
 			"post": {
 				"description": "Saves the user bank account details",
 				"tags": [
 					"Payments"
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"required": true,
+						"in": "body",
+						"type": "object",
+						"properties": {
+							"acct_num": {
+								"type":"string"
+							},
+							"bank_name": {
+								"type": "string"
+							},
+							"acct_name": {
+								"type":"string"
+							}, 
+							"bank_code": {
+								"type": "integer"
+							}, 
+							"first_name": {
+								"type": "string"
+							},
+							"last_name": {
+								"type": "string"
+							},
+							"other": {
+								"type": "string"
+							}
+						}
+					}
 				],
 				"responses": {
 					"content": [
@@ -565,9 +630,88 @@
 					"Payments"
 				],
 				"responses": {
-					"content": [
-						"application/json"
-					]
+					"content": {
+						"application/json": {
+
+						}
+					}
+				}
+			}
+		},
+		"/api/activate_required/": {
+			"description": "Activates user based on authorization token",
+			"post": {
+				"tags": [
+					"Users"
+				],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json":{
+								"schema": {
+									"type": "object",
+									"items": {
+										"message": {
+											"type": "string",
+											"example": "User Account Activated"
+										},
+										"status": {
+											"type": "string",
+											"example": "success"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/users/resend-activation-link/":{
+			"post":{
+				"description": "Resends activation link",
+				"tags":[
+					"Users"
+				],
+				"security":[
+					
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties":{
+							"email": {
+								"type":"string",
+								"example":"example@email.com",
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content":{
+							"application/json":{
+
+							}
+						}
+					},
+					"401": {
+						"content": {
+							"application/json": {
+
+							}
+						}
+					}
 				}
 			}
 		}

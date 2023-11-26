@@ -18,7 +18,7 @@ api.add_url_rule('/bank/', view_func=BankAPIView.as_view('bank_acct'))
 # function based view
 @api.post('/authenticate/')
 def authenticate():
-	print(request.is_json)
+
 	json = request.get_json()
 	auth_message = {
 		"valid": False,
@@ -98,7 +98,7 @@ def signup():
 		return register_message
 	return register_message
 
-@api.post("/users/resend-creation-link/")
+@api.post("/users/resend-activation-link/")
 def resend_creation_link():
 	json = request.get_json()
 	email = json.get('email')
@@ -244,6 +244,17 @@ def invoices():
 	}
 	return data
 
+@api.post("/activate_required/")
+@auth.login_required
+def activate_required():
+	user = auth.current_user()
+	user.is_activated = True
+	db.session.add(user)
+	db.session.commit()
+	return {
+		"message": "User Account Activated",
+		"status": "success",
+	}
 
 @api.app_errorhandler(500)
 def internal_error(e):

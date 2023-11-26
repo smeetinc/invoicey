@@ -212,6 +212,7 @@ class BankAPIView(MethodView):
 			"first_name": user.bank.first_name,
 			"last_name": user.bank.last_name,
 		}
+	
 	def post(self):
 		json = request.get_json(cache=False)
 		user = auth.current_user()
@@ -219,7 +220,7 @@ class BankAPIView(MethodView):
 			acct_num = json.get("acct_num")
 			bank_name = json.get("bank_name")
 			acct_name = json.get("acct_name")
-			bank_code = json.get("bank_code"),
+			bank_code = json.get("bank_code", type=int),
 			first = json.get("first_name")
 			last = json.get("last_name")
 			other = json.get("other")
@@ -233,7 +234,8 @@ class BankAPIView(MethodView):
 				bank_account = MerchantBankAccount(acct_num=str(acct_num),
 									   bank_name=bank_name, first_name=first,
 									   last_name=last, other=other,
-									   merchant=user, acct_name=acct_name)
+									   merchant=user, acct_name=acct_name,
+									   bank_code=bank_code)
 				resp = create_sub_account(data)
 				if resp.get('status'):
 					db.session.add(bank_account)
