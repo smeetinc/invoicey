@@ -6,7 +6,9 @@ import { TbEyeSearch } from "react-icons/tb";
 
 function login() {
   const [show, setShow] = useState(false);
-  const handleSubmit = (e) => {};
+  const handleSubmit = (e) => {
+    e.preventDef;
+  };
   return (
     <div className="w-full bg-accent h-screen p-6">
       <div className="flex mx-auto w-3/5 shadow-sm">
