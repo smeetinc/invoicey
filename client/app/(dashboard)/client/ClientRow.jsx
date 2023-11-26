@@ -3,6 +3,9 @@ import { useRef, useState } from "react";
 import { poppins } from "@/utils/fonts";
 import Link from "next/link";
 import { Dialog } from "@headlessui/react";
+import { clientSchema } from "@/utils/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 const DeleteModal = ({ isOpen, closeModal }) => {
   return (
     <Dialog open={isOpen} onClose={closeModal}>
@@ -81,8 +84,22 @@ const DeleteModal = ({ isOpen, closeModal }) => {
   );
 };
 const EditModal = ({ isOpen, closeModal }) => {
+  const {
+    handleSubmit,
+    register,
+    reset,
+    formState: { errors },
+  } = useForm({ resolver: zodResolver(clientSchema) });
+  const submitHandler = (data) => {
+    console.log(data);
+    reset();
+  };
+  const resetAndCloseModal = () => {
+    reset();
+    closeModal();
+  };
   return (
-    <Dialog open={isOpen} onClose={closeModal}>
+    <Dialog open={isOpen} onClose={resetAndCloseModal}>
       <div
         className="fixed z-50 inset-0 bg-black/30 w-screen h-screen grid place-items-center"
         aria-hidden="true"
@@ -92,7 +109,7 @@ const EditModal = ({ isOpen, closeModal }) => {
             <h1 className="text-base font-bold tracking-[0.32px]">
               Edit Client
             </h1>
-            <button className="text-grey" onClick={closeModal}>
+            <button className="text-grey" onClick={resetAndCloseModal}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -110,7 +127,7 @@ const EditModal = ({ isOpen, closeModal }) => {
               </svg>
             </button>
           </Dialog.Title>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleSubmit(submitHandler)}>
             <div className="grid grid-cols-2 gap-8  mb-8">
               <div className="flex flex-col gap-2  ">
                 <label
@@ -123,8 +140,14 @@ const EditModal = ({ isOpen, closeModal }) => {
                   placeholder="Toyosi Lawal"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
                   id="name"
-                  name="name"
+                  {...register("clientName", { required: true })}
                 />
+
+                {errors.clientName && (
+                  <p className="text-error font-normal text-base">
+                    {errors.clientName?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
@@ -138,8 +161,17 @@ const EditModal = ({ isOpen, closeModal }) => {
                   type="email"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
                   id="emdil"
-                  name="email"
+                  {...register("email", {
+                    required: true,
+                    pattern: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                  })}
                 />
+
+                {errors.email && (
+                  <p className="text-error font-normal text-base">
+                    {errors.email?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
@@ -152,7 +184,17 @@ const EditModal = ({ isOpen, closeModal }) => {
                   placeholder="23/11/97"
                   type="date"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
+                  {...register("birthday", {
+                    required: true,
+                    valueAsDate: true,
+                  })}
                 />
+
+                {errors.birthday && (
+                  <p className="text-error font-normal text-base">
+                    {errors.birthday?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
@@ -162,13 +204,19 @@ const EditModal = ({ isOpen, closeModal }) => {
                   Gender
                 </label>
                 <select
-                  placeholder="23/11/97"
-                  type="date"
+                  id="gender"
+                  {...register("gender", { required: true, minLength: 3 })}
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
                 >
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                 </select>
+
+                {errors.gender && (
+                  <p className="text-error font-normal text-base">
+                    {errors.gender?.message}
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-2  ">
                 <label
@@ -180,7 +228,17 @@ const EditModal = ({ isOpen, closeModal }) => {
                 <input
                   placeholder="+2347098457324"
                   className="px-4 py-3 rounded-lg border border-[#D0D5DD] shadow-sm placeholder:text-grey text-dark text-base leading-6 font-normal"
+                  {...register("phoneNumber", {
+                    required: true,
+                    valueAsNumber: true,
+                  })}
                 />
+
+                {errors.phoneNumber && (
+                  <p className="text-error font-normal text-base">
+                    {errors.phoneNumber?.message}
+                  </p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -194,7 +252,7 @@ const EditModal = ({ isOpen, closeModal }) => {
               <button
                 type="submit"
                 className="bg-error py-3 px-5 rounded-lg border border-[#7F56D9] text-white flex justify-center items-center text-base font-medium leading-6"
-                onClick={closeModal}
+                onClick={resetAndCloseModal}
               >
                 Cancel
               </button>
