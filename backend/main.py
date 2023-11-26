@@ -6,7 +6,7 @@ from flask_mail import Mail
 from flask_cors import CORS
 from flask import Flask
 from utils import Config, DevelopmentConfig
-
+import jwt
 
 
 SWAGGER_URL = '/api-docs'
@@ -73,10 +73,13 @@ def verify_token(token: str):
     """
         An function that validates auth token
     """
-    token = User.decode_jwt_token(token) if token else None
-    if token:
-        _id = token.get("id")
-        if _id:
-            user = User.query.get(_id)
-            if user and user.is_activated:
-                return user
+    try:
+        token = User.decode_jwt_token(token) if token else None
+        if token:
+            _id = token.get("id")
+            if _id:
+                user = User.query.get(_id)
+                if user and user.is_activated:
+                    return user
+    except jwt.ExpiredSignatureError:
+        pass

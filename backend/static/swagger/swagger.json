@@ -431,6 +431,17 @@
 			}
 		},
 		"/api/clients/": {
+			"parameters": [
+				{
+					"name": "Authorization",
+					"in": "header",
+					"required": true,
+					"type": "string",
+					"properties": {
+						"Authorization": "Bearer {Token}"
+					}
+				}
+			],
 			"post": {
 				"description": "Creates the clients",
 				"tags": [
@@ -464,15 +475,6 @@
 								"example": "F/M"
 							}
 						}
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"required": true,
-						"type": "string",
-						"properties": {
-							"Authorization": "Bearer {Token}"
-						}
 					}
 				],
 				"responses": {
@@ -495,12 +497,6 @@
 						"in": "query",
 						"required": true,
 						"type": "integer"
-					},
-					{
-						"name": "Authorization",
-						"in": "header",
-						"required": true,
-						"type": "string"
 					}
 				],
 				"responses": {
@@ -511,6 +507,25 @@
 					}
 				}
 
+			},
+			"delete": {
+				"description": "Deletes the client Data",
+				"tags": [
+					"Clients"
+				],
+				"parameters":[
+					{
+						"name":"_id",
+						"in":"query",
+						"required": true,
+						"type": "integer"
+					}
+				],
+				"responses":{
+					"content":[
+						"application/json"
+					]
+				}
 			}
 		},
 		"/api/bank/": {
@@ -526,19 +541,34 @@
 				"description": "Get the user or Merchant Bank Accounts",
 				"tags": [
 					"Payments"
-				]
+				],
+				"responses":{
+					"content": [
+						"application/json"
+					]
+				}
 			},
 			"post": {
 				"description": "Saves the user bank account details",
 				"tags": [
 					"Payments"
-				]
+				],
+				"responses": {
+					"content": [
+						"application/json"
+					]
+				}
 			},
 			"delete": {
 				"description": "Deletes the user bank account",
 				"tags": [
 					"Payments"
-				]
+				],
+				"responses": {
+					"content": [
+						"application/json"
+					]
+				}
 			}
 		}
 	}

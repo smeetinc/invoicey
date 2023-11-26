@@ -121,3 +121,30 @@ class MerchantBankAccount(db.Model, BaseMixin):
     bank_name = db.Column(db.String(80), nullable=False)
     bank_code = db.Column(db.Integer)
     merchant_id = db.Column(db.Integer, db.ForeignKey('users._id'))
+
+class Banks(db.Model, BaseMixin):
+    __tablename__ = 'banks'
+    name = db.Column(db.String(80))
+    bank_code = db.Column(db.Integer)
+
+    @classmethod
+    def store_banks_fresh(cls):
+        """\
+            Stores multiple banks data from nubapi
+        """
+        import requests
+        try:
+            resp = requests.get("https://nubapi.com/")
+            json = resp.json()
+            items = json.items
+            unused = [
+
+            ]
+            for code, bank in items:
+                unused.append(cls(name=bank, bank_code=code))
+            db.session.add_all(unused)
+            db.session.commit()
+            return True
+        except:
+            from urllib import request
+            pass

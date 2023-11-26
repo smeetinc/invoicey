@@ -85,7 +85,7 @@ class ClientDataAPIView(MethodView):
 		return client_msg
 
 	def delete(self):
-		client_id = request.args.get('id', type=int)
+		client_id = request.args.get('_id', type=int)
 		current_user = auth.current_user()
 		client = Client.query.get(client_id)
 		if client and current_user.client_created_by_me(client.pk)\
@@ -205,7 +205,10 @@ class BankAPIView(MethodView):
 	def get(self):
 		pass
 	def post(self):
-		pass
+		json = request.get_json(cache=False)
+		if json:
+			acct_num = json.get("acct_num")
+			bank_name = json.get("bank_name")
 	def put(self):
 		pass
 	def delete(self):
