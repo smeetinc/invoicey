@@ -245,7 +245,7 @@ class BankAPIView(MethodView):
 			acct_num = json.get("acct_num")
 			bank_name = json.get("bank_name")
 			acct_name = json.get("acct_name")
-			bank_code = json.get("bank_code", type=int),
+			bank_code = json.get("bank_code"),
 			first = json.get("first_name")
 			last = json.get("last_name")
 			other = json.get("other")
@@ -258,11 +258,11 @@ class BankAPIView(MethodView):
 				}
 				bank_account = MerchantBankAccount(acct_num=str(acct_num),
 									   bank_name=bank_name, first_name=first,
-									   last_name=last, other=other,
+									   last_name=last, other_name=other,
 									   merchant=user, acct_name=acct_name,
 									   bank_code=bank_code)
 				resp = create_sub_account(data)
-				if resp.get('status'):
+				if resp and resp.get('status'):
 					db.session.add(bank_account)
 					db.session.commit()
 					return {
@@ -270,7 +270,7 @@ class BankAPIView(MethodView):
 						"status": "success",
 					}
 				return {
-					"message": "Sorry an error occured",
+					"message": "Sorry an error occured your bank details have been saved",
 					"status": "error"
 				}
 			return {

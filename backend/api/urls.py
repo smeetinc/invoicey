@@ -274,12 +274,12 @@ def get_user_data():
 	}
 	return data
 
-@api.app_errorhandler(500)
-def internal_error(e):
-	return {
-		"message": e.name,
-		"code": e.code,
-	}, 500
+# @api.app_errorhandler(500)
+# def internal_error(e):
+# 	return {
+# 		"message": e.name,
+# 		"code": e.code,
+# 	}, 500
 
 @api.app_errorhandler(404)
 def not_found(e):
