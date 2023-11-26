@@ -15,28 +15,27 @@ function signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState("");
+  async function fetchCsrfToken() {
+    try {
+      const response = await axios.get(
+        "http://olatidejosepha.pythonanywhere.com/",
+        {
+          headers: {
+            "is-from-site": "x-token-value",
+          },
+        }
+      );
 
+      return response.data.csrf_token;
+      setCsrfToken(response.data.csrf_token);
+    } catch (error) {
+      console.error("Error fetching CSRF token:", error);
+      // Handle error accordingly
+      console.log(error);
+    }
+  }
   useEffect(() => {
     // Fetch CSRF token when the component mounts
-    async function fetchCsrfToken() {
-      try {
-        const response = await axios.get(
-          "http://olatidejosepha.pythonanywhere.com/",
-          {
-            headers: {
-              "is-from-site": "x-token-value",
-            },
-          }
-        );
-        console.log(response);
-
-        setCsrfToken(response.data.csrf_token);
-      } catch (error) {
-        console.error("Error fetching CSRF token:", error);
-        // Handle error accordingly
-        console.log(error);
-      }
-    }
 
     fetchCsrfToken();
   }, []);
@@ -75,28 +74,37 @@ function signup() {
     };
 
     const jsonData = JSON.stringify(formData);
-    console.log(csrfToken);
 
     // Make the POST request with Axios
-    axios.defaults.headers.common["X-Token"] = csrfToken;
+    // axios.defaults.headers.common["X-Token"] = csrfToken;
     try {
-      const response = await axios.post(
-        "http://olatidejosepha.pythonanywhere.com/api/register-user/", // Replace with your actual Flask backend URL
-        jsonData,
+      // const response = await axios.post(
+      //   "http://olatidejosepha.pythonanywhere.com/api/register-user/", // Replace with your actual Flask backend URL
+      //   jsonData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       "x-Token": token,
+      //     },
+      //     withCredentials: true,
+      //   }
+      // );
+
+      const res = await fetch(
+        "http://olatidejosepha.pythonanywhere.com/api/register-user/",
         {
+          method: "POST",
+          body: jsonData,
           headers: {
             "Content-Type": "application/json",
-            "X-Token": csrfToken,
           },
-          withCredentials: true,
+          credentials: "include",
         }
       );
+      const responseData = await res.json();
 
-      const responseData = response.data;
-
-      // Handle success response
       console.log(responseData);
-      window.location.href = "/"; // Redirect to a success page or handle accordingly
+      // Redirect to a success page or handle accordingly
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {

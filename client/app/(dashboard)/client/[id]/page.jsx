@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import InvoiceRow from "./InvoiceRow";
+import InvoiceRow from "../../invoice/InvoiceRow";
 
 const SingleClientPage = () => {
   return (
