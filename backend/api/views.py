@@ -24,12 +24,12 @@ class MultipleClientDataAPIView(View):
 					"phone": client.phone,
 					"birth_date": client.birth_date.strftime("%d/%m/%Y"),
 					"gender": client.gender,
-				} for client in pclients.items
+				} for client in pclients.items if not client.is_deleted
 			],
 			"has_next": pclients.has_next,
 			"has_prev": pclients.has_prev,
-			"total": pclients.total,
 		}
+		data['total'] = len(data['clients'])
 		return data
 
 class ClientDataAPIView(MethodView):

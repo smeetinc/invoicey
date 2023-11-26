@@ -871,6 +871,36 @@
 					"required":true
 				}
 			]
+		},
+		"/api/multi/invoices/": {
+			"get":{
+				"parameters": [
+					{
+						"name": "page",
+						"in": "query",
+						"required": true,
+						"type":"integer"
+					},
+					{
+						"name":"Authorization",
+						"in":"header",
+						"required":true,
+						"type": "integer"
+					}
+				],
+				"description": "Get all clients based on current authenticated user",
+				"tags": [
+					"Invoices"
+				],
+				"responses":{
+					"200":{
+						"description":"OK"
+					},
+					"401": {
+						"description":"Unauthorized"
+					}
+				}
+			}
 		}
 	}
 }
