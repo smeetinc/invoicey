@@ -195,6 +195,7 @@ def verify_reset(token: str, _id: int):
 			db.session.commit()
 			data['message'] = "Validated"
 			return data
+		
 @api.get('/overview-data/')
 @auth.login_required
 def overview():
@@ -270,6 +271,7 @@ def unauthorized(e):
 	return {
 		"message": e.name,
 		"code": e.code,
+		"description": e.description,
 	}, 401
 
 @api.app_errorhandler(502)

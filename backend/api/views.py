@@ -1,7 +1,7 @@
 from flask.views import MethodView, View
 from flask import request, current_app, url_for, request, render_template as render
-from users.models import Client, User, Invoice
-from utils import smtnb
+from users.models import Client, User, Invoice, MerchantBankAccount
+from utils import smtnb, create_sub_account
 from main import auth, db
 import datetime
 import secrets
@@ -203,12 +203,57 @@ class BankAPIView(MethodView):
 	decorators = [auth.login_required]
 	
 	def get(self):
-		pass
+		user = auth.current_user()
+		return {
+			"acct_num": user.bank.acct_num,
+			"bank_name": user.bank.bank_name,
+			"bank_code": user.bank.bank_code,
+			"acct_name": user.bank.acct_name,
+			"first_name": user.bank.first_name,
+			"last_name": user.bank.last_name,
+		}
 	def post(self):
 		json = request.get_json(cache=False)
+		user = auth.current_user()
 		if json:
 			acct_num = json.get("acct_num")
 			bank_name = json.get("bank_name")
+			acct_name = json.get("acct_name")
+			bank_code = json.get("bank_code"),
+			first = json.get("first_name")
+			last = json.get("last_name")
+			other = json.get("other")
+			if acct_num and bank_name and acct_name and first and last:
+				data = {
+					"account_number": str(acct_num),
+					"business_name": user.business.name,
+					"settlement_bank": str(bank_code),
+					"percentage_charge": 10
+				}
+				bank_account = MerchantBankAccount(acct_num=str(acct_num),
+									   bank_name=bank_name, first_name=first,
+									   last_name=last, other=other,
+									   merchant=user, acct_name=acct_name)
+				resp = create_sub_account(data)
+				if resp.get('status'):
+					db.session.add(bank_account)
+					db.session.commit()
+					return {
+						"message": "Account number added",
+						"status": "success",
+					}
+				return {
+					"message": "Sorry an error occured",
+					"status": "error"
+				}
+			return {
+				"message": "Incomplete data resources",
+				"status": "error"
+			}
+		return {
+			"message": "Json not received",
+			"status": "error"
+		}
 	def put(self):
 		pass
 	def delete(self):

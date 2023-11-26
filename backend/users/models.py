@@ -117,6 +117,7 @@ class MerchantBankAccount(db.Model, BaseMixin):
     acct_num = db.Column(db.String(10), nullable=False)
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
+    acct_name = db.Column(db.String(150), nullable=False)
     other_name = db.Column(db.String(120))
     bank_name = db.Column(db.String(80), nullable=False)
     bank_code = db.Column(db.Integer)
