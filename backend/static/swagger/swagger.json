@@ -333,7 +333,7 @@
 													},
 													"birth_date": {
 														"type": "string",
-														"example": "dd/mm/yy"
+														"example": "dd/mm/yyyy"
 													},
 													"gender": {
 														"type": "string",
@@ -692,7 +692,7 @@
 						"properties":{
 							"email": {
 								"type":"string",
-								"example":"example@email.com",
+								"example":"example@email.com"
 							}
 						}
 					}
@@ -714,6 +714,163 @@
 					}
 				}
 			}
+		},
+		"/api/invoice/":{
+			"get": {
+				"tags": [
+					"Invoices"
+				],
+				"description": "Gets a single Invoice passing in as a query param inv_id",
+				"parameters": [
+					{
+						"name":"inv_id",
+						"in": "query",
+						"required":true,
+						"type": "string"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Invoices"
+				],
+				"description": "Accepts a json body in the request",
+				"parameters":[
+					{
+						"name": "body",
+						"in":"body",
+						"required": true,
+						"properties":{
+							"product_name": {
+								"type": "string",
+								"example": "Product Name"
+							},
+							"description": {
+								"type": "string",
+								"example": "Product Description"
+							},
+							"client_name": {
+								"type": "string",
+								"example": "Client Full Name"
+							},
+							"amount": {
+								"type": "double",
+								"example": 2000.00
+							},
+							"has_paid": {
+								"type":  "boolean",
+								"example": false
+							},
+							"py_type": {
+								"type": "string",
+								"example": "Payment type"
+							},
+							"due_date": {
+								"type": "string",
+								"example": "dd/mm/yyyy"
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Invoices"
+				],
+				"parameters":[
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"inv_id": {
+								"type": "string",
+								"example": "invoice id"
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {}
+								}
+							}
+						}
+					}
+				}
+			},
+			"parameters": [
+				{
+					"name":"Authorization",
+					"in":"header",
+					"required":true
+				}
+			]
 		}
 	}
 }

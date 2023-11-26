@@ -2,7 +2,8 @@ from flask import jsonify, make_response, url_for, request, current_app, render_
 from users.models import User, Invoice, Client, Business
 from utils import smtnb, send_mail_text, send_mail
 from main import db, auth
-from .views import ClientDataAPIView, MultipleClientDataAPIView, BankAPIView
+from .views import (ClientDataAPIView, MultipleClientDataAPIView,
+					BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
 from . import api
 import jwt
 import datetime
@@ -13,6 +14,8 @@ import datetime
 api.add_url_rule('/clients/', view_func=ClientDataAPIView.as_view('client'))
 api.add_url_rule('/all-client-data/',
 				 view_func=MultipleClientDataAPIView.as_view('multiple_client'))
+api.add_url_rule('/invoice/', view_func=InvoiceDataAPIView.as_view('invoice'))
+api.add_url_rule('/multi/invoice/', view_func=MultipleInvoiceDataAPIView.as_view('multi_invoice'))
 api.add_url_rule('/bank/', view_func=BankAPIView.as_view('bank_acct'))
 
 # function based view
@@ -226,22 +229,24 @@ def invoices():
 	pinvoices = Invoice.query.order_by(Invoice.has_paid.asc()).\
 				paginate(page=page, per_page=per_page)
 	invoices = pinvoices.items
-	total = pinvoices.total
+	total = 0
 	data = {
 		"invoices": [
 			{
 				'trsc_id': invoice.trsc_id,
 				'client_name': invoice.client.name,
 				'type': invoice.payment_type,
-				'ref_id': invoice.ref,
+				'ref_id': invoice.ref_id,
+				'inv_id': invoice.inv_id,
 				'amt': invoice.amount,
 				'has_paid': invoice.has_paid,
-			} for invoice in invoices
+				'py_type': invoice.payment_type,
+			} for invoice in invoices if invoice.user.name == auth.current_user().name
 		],
 		"has_next": pinvoices.has_next,
 		"has_prev": pinvoices.has_prev,
-		"total": total,
 	}
+	data['total'] = len(data['invoices'])
 	return data
 
 @api.post("/activate_required/")

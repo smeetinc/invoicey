@@ -83,11 +83,11 @@ class Business(db.Model, BaseMixin):
 class Client(db.Model, BaseMixin):
     __tablename__ = "clients"
     name = db.Column(db.String(120), unique=False, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=False, nullable=False)
     birth_date = db.Column(db.Date)
     gender = db.Column(db.String(1))
     phone = db.Column(db.String(13))
-    user_id = db.Column(db.Integer, db.ForeignKey("users._id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users._id"), nullable=False)
     invoices = db.relationship("Invoice", backref="client", lazy=True)
 
 class Invoice(db.Model, BaseMixin):

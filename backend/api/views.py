@@ -63,10 +63,11 @@ class ClientDataAPIView(MethodView):
 		}
 		json = request.json
 		if json:
-			client = Client.query.filter_by(email=json.get('email')).first()
-			if client:
-				client_msg['message'] = "Client with that email already exists"
-				client_msg['created'] = True
+			client = Client.query.filter_by(phone=json.get('phone')).first()
+			if client and client.user.business.\
+				name == auth.current_user().business.name:
+				client_msg['message'] = "Client with that phone already exists"
+				client_msg['created'] = False
 				return client_msg
 			name = json.get('name')
 			email = json.get('email')
@@ -131,7 +132,24 @@ class InvoiceDataAPIView(MethodView):
 	def delete(self):
 		json = request.get_json()
 		if json:
-			pass
+			inv_id = json.get('inv_id')
+			invoice = Invoice.query.filter_by(inv_id=inv_id).first()
+			if invoice and auth.current_user().invoice_created_by_me(invoice.pk):
+				invoice.is_deleted = True
+				db.session.add(invoice)
+				db.session.commit()
+				return {
+					"message": "Invoice deleted",
+					"status": "success"
+				}
+			return {
+				"message": "Invoice not found",
+				"status": "error"
+			}
+		return {
+			"message": "Data Not Received",
+			"status": "error"
+		}
 	def post(self):
 		data = request.get_json()
 		if data:
@@ -140,7 +158,7 @@ class InvoiceDataAPIView(MethodView):
 			product_name = data.get("product_name")
 			description = data.get("description")
 			client_name = data.get("client_name")
-			amount = data.get("amt")
+			amount = data.get("amount")
 			has_paid = data.get("has_paid")
 			py_type = data.get("py_type")
 			due_date = datetime.datetime.strptime(data.get("due_date"), "%d/%m/%Y")
@@ -156,7 +174,7 @@ class InvoiceDataAPIView(MethodView):
 				#send a nonblocking io mail
 				smtnb(f"Invoice Notification for {inv_id}",
 					recipients=[client.email],
-					html=render("pay_invoice.html", invoice=invoice, client=client))
+					html=render("mail/pay_invoice.html", invoice=invoice, client=client))
 				return {
 					"message": "invoice created",
 					"status": "success"
@@ -204,13 +222,20 @@ class BankAPIView(MethodView):
 	
 	def get(self):
 		user = auth.current_user()
+		if user.bank and not user.bank.is_deleted:
+			return {
+				"acct_num": user.bank.acct_num,
+				"bank_name": user.bank.bank_name,
+				"bank_code": user.bank.bank_code,
+				"acct_name": user.bank.acct_name,
+				"first_name": user.bank.first_name,
+				"last_name": user.bank.last_name,
+				"status": "success",
+				"message": "Merchant Bank"
+			}
 		return {
-			"acct_num": user.bank.acct_num,
-			"bank_name": user.bank.bank_name,
-			"bank_code": user.bank.bank_code,
-			"acct_name": user.bank.acct_name,
-			"first_name": user.bank.first_name,
-			"last_name": user.bank.last_name,
+			"message": "Merchant bank haven't been created",
+			"status": "error"
 		}
 	
 	def post(self):
