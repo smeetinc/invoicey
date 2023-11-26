@@ -242,39 +242,45 @@ class BankAPIView(MethodView):
 		json = request.get_json(cache=False)
 		user = auth.current_user()
 		if json:
-			acct_num = json.get("acct_num")
-			bank_name = json.get("bank_name")
-			acct_name = json.get("acct_name")
-			bank_code = json.get("bank_code"),
-			first = json.get("first_name")
-			last = json.get("last_name")
-			other = json.get("other")
-			if acct_num and bank_name and acct_name and first and last:
-				data = {
-					"account_number": str(acct_num),
-					"business_name": user.business.name,
-					"settlement_bank": str(bank_code),
-					"percentage_charge": 10
-				}
-				bank_account = MerchantBankAccount(acct_num=str(acct_num),
-									   bank_name=bank_name, first_name=first,
-									   last_name=last, other_name=other,
-									   merchant=user, acct_name=acct_name,
-									   bank_code=bank_code)
-				resp = create_sub_account(data)
-				if resp and resp.get('status'):
-					db.session.add(bank_account)
-					db.session.commit()
+			if not user.bank:
+				acct_num = json.get("acct_num")
+				bank_name = json.get("bank_name")
+				acct_name = json.get("acct_name")
+				bank_code = json.get("bank_code")
+				print(bank_code)
+				first = json.get("first_name")
+				last = json.get("last_name")
+				other = json.get("other")
+				if acct_num and bank_name and acct_name and first and last:
+					data = {
+						"account_number": str(acct_num),
+						"business_name": user.business.name,
+						"settlement_bank": str(bank_code),
+						"percentage_charge": 10
+					}
+					bank_account = MerchantBankAccount(acct_num=str(acct_num),
+										bank_name=bank_name, first_name=first,
+										last_name=last, other_name=other,
+										merchant=user, acct_name=acct_name,
+										bank_code=bank_code)
+					resp = create_sub_account(data)
+					if resp and resp.get('status'):
+						db.session.add(bank_account)
+						db.session.commit()
+						return {
+							"message": "Account number added",
+							"status": "success",
+						}
 					return {
-						"message": "Account number added",
-						"status": "success",
+						"message": "Sorry an error occured your bank details have been saved",
+						"status": "error"
 					}
 				return {
-					"message": "Sorry an error occured your bank details have been saved",
+					"message": "Incomplete data resources",
 					"status": "error"
 				}
 			return {
-				"message": "Incomplete data resources",
+				"message": "Merchant as an account registered please delete to add new one",
 				"status": "error"
 			}
 		return {
