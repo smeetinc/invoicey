@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const UserCtx = createContext({
   user: {},
@@ -13,9 +13,10 @@ const UserCtx = createContext({
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const login = (user) => {
+  const login = (user, tk) => {
     setUser(user);
-    // localStorage.setItem('invc_tk')
+
+    localStorage.setItem("invc_tk", tk);
   };
   logout = () => {
     setUser(null);
@@ -34,3 +35,5 @@ const UserProvider = ({ children }) => {
     </UserCtx.Provider>
   );
 };
+
+export const useAuth = () => useContext(UserCtx);

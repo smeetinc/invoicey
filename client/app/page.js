@@ -4,6 +4,9 @@ import React, { useState, useEffect } from "react";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { TbEyeSearch } from "react-icons/tb";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useAuth } from "@/context/User";
 
 function login() {
   const [emailAddress, setEmailAddress] = useState("");
@@ -12,33 +15,9 @@ function login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [error, setError] = useState("");
+  const route = useRouter();
 
-  {
-    /*useEffect(() => {
-    // Fetch CSRF token when the component mounts
-    async function fetchCsrfToken() {
-      try {
-        const response = await axios.get(
-          "https://olatidejosepha.pythonanywhere.com/",
-          {
-            headers: {
-              Authorization: "Authorization",
-            },
-          }
-        );
-        console.log(response);
-
-        setCsrfToken(response.data.refresh_token);
-      } catch (error) {
-        console.error("Error fetching CSRF token:", error);
-        // Handle error accordingly
-        console.log(error);
-      }
-    }
-
-    fetchCsrfToken();
-  }, []); */
-  }
+  const auth = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -58,7 +37,7 @@ function login() {
     try {
       console.log("Sending POST request...");
       const response = await axios.post(
-        "http://olatidejosepha.pythonanywhere.com/api/authenticate/",
+        "https://olatidejosepha.pythonanywhere.com/api/authenticate/",
         jsonData,
         {
           headers: {
@@ -68,7 +47,16 @@ function login() {
       );
 
       console.log("Response from server:", response.data);
-      window.location.href = "/overview"; // Redirect to a success page or handle accordingly
+      if (!response.data.is_activated) {
+        toast.error(response.data.message);
+        return;
+      }
+      console.log(response.data?.refresh_token);
+      localStorage.setItem("invc", response.data?.refresh_token);
+      auth.login({}, response.data?.refresh_token);
+      toast.success("Welcome Back");
+      route.replace("/overview");
+      // Redirect to a success page or handle accordingly
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {

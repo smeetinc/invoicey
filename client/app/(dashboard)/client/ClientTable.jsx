@@ -14,7 +14,6 @@ const AddClientModal = ({ isOpen, closeModal }) => {
     formState: { errors },
   } = useForm({ resolver: zodResolver(clientSchema) });
   const submitHandler = (data) => {
-    console.log(data);
     reset();
   };
   const resetAndCloseModal = () => {

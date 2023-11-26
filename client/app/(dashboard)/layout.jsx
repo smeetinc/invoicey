@@ -1,5 +1,6 @@
 "use client";
 import { poppins } from "@/utils/fonts";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -124,7 +125,20 @@ export default function DashboardLayout({ children }) {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="min-h-[60px] border-b border-b-grey w-full mb-5"></section>
+        <section className="min-h-[60px] border-b border-b-grey w-full mb-5">
+          <Link
+            href={"/profile"}
+            className="flex flex-row-reverse gap-1 border-b-2 w-full py-4"
+          >
+            <Image
+              src="/assets/Mask.png"
+              width={32}
+              height={32}
+              alt="avatar"
+              className="mr-4"
+            />
+          </Link>
+        </section>
         <section className="mx-10 overflow-x-hidden">{children}</section>
       </main>
     </div>

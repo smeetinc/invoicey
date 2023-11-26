@@ -16,7 +16,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
     formRef.current?.reset();
     closeModal();
   };
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (!selectedBankCode) {
       toast.error("Select Your Bank");
@@ -31,14 +31,31 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
     }
 
     const data = {
-      account_number: accountNumber,
-      account_name: accountDetails?.account_name,
+      acct_num: accountNumber,
+      acct_name: accountDetails?.account_name,
       bank_name: accountDetails?.Bank_name,
       bank_code: selectedBankCode,
+      first_name: accountDetails?.first_name,
+      last_name: accountDetails?.last_name,
+      other: accountDetails?.other_name || "",
     };
+    try {
+      const token = localStorage.getItem("invc");
 
-    toast.success("Account Added");
-    resetAndCloseModal();
+      const res = await axios.post(
+        "https://olatidejosepha.pythonanywhere.com/api/bank/",
+        JSON.stringify(data),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(res.data);
+      toast.success("Account Added");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {

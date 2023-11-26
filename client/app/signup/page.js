@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { TbEyeSearch } from "react-icons/tb";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 function signup() {
   const [fullName, setFullName] = useState("");
@@ -15,33 +16,7 @@ function signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState("");
-
-  {
-    /*useEffect(() => {
-    // Fetch CSRF token when the component mounts
-    async function fetchCsrfToken() {
-      try {
-        const response = await axios.get(
-          "https://olatidejosepha.pythonanywhere.com/",
-          {
-            headers: {
-              Authorization: "Authorization",
-            },
-          }
-        );
-        console.log(response);
-
-        setCsrfToken(response.data.refresh_token);
-      } catch (error) {
-        console.error("Error fetching CSRF token:", error);
-        // Handle error accordingly
-        console.log(error);
-      }
-    }
-
-    fetchCsrfToken();
-  }, []); */
-  }
+  const route = useRouter();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -66,7 +41,7 @@ function signup() {
     try {
       console.log("Sending POST request...");
       const response = await axios.post(
-        "http://olatidejosepha.pythonanywhere.com/api/register-user/",
+        "https://olatidejosepha.pythonanywhere.com/api/register-user/",
         jsonData,
         {
           method: "POST",
@@ -76,10 +51,10 @@ function signup() {
           },
         }
       );
-      const responseData = await res.json();
 
       console.log("Response from server:", response.data);
-      window.location.href = "/"; // Redirect to a success page or handle accordingly
+      // Redirect to a success page or handle accordingly
+      route.push("/");
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {
