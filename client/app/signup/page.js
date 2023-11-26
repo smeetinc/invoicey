@@ -15,30 +15,33 @@ function signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState("");
-  async function fetchCsrfToken() {
-    try {
-      const response = await axios.get(
-        "http://olatidejosepha.pythonanywhere.com/",
-        {
-          headers: {
-            "is-from-site": "x-token-value",
-          },
-        }
-      );
 
-      return response.data.csrf_token;
-      setCsrfToken(response.data.csrf_token);
-    } catch (error) {
-      console.error("Error fetching CSRF token:", error);
-      // Handle error accordingly
-      console.log(error);
-    }
-  }
-  useEffect(() => {
+  {
+    /*useEffect(() => {
     // Fetch CSRF token when the component mounts
+    async function fetchCsrfToken() {
+      try {
+        const response = await axios.get(
+          "https://olatidejosepha.pythonanywhere.com/",
+          {
+            headers: {
+              Authorization: "Authorization",
+            },
+          }
+        );
+        console.log(response);
+
+        setCsrfToken(response.data.refresh_token);
+      } catch (error) {
+        console.error("Error fetching CSRF token:", error);
+        // Handle error accordingly
+        console.log(error);
+      }
+    }
 
     fetchCsrfToken();
-  }, []);
+  }, []); */
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -49,23 +52,8 @@ function signup() {
     const email = emailAddress.trim();
     const pwd = password.trim();
     const conpwd = conPassword.trim();
-    if (!fullname || !businessname || !email || !pwd || !conpwd) {
-      alert("All fields are required");
-      setIsLoading(false);
-      return;
-    }
-    if (pwd.length < 6) {
-      alert("Password must be at least 6 characters long");
-      setIsLoading(false);
-      return;
-    }
-    if (pwd !== conpwd) {
-      alert("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
 
-    // Include CSRF token in the form data
+    // Include CSRF token in the form data (if needed)
     const formData = {
       email: email,
       name: fullname,
@@ -75,50 +63,37 @@ function signup() {
 
     const jsonData = JSON.stringify(formData);
 
-    // Make the POST request with Axios
-    // axios.defaults.headers.common["X-Token"] = csrfToken;
     try {
-      // const response = await axios.post(
-      //   "http://olatidejosepha.pythonanywhere.com/api/register-user/", // Replace with your actual Flask backend URL
-      //   jsonData,
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       "x-Token": token,
-      //     },
-      //     withCredentials: true,
-      //   }
-      // );
-
-      const res = await fetch(
+      console.log("Sending POST request...");
+      const response = await axios.post(
         "http://olatidejosepha.pythonanywhere.com/api/register-user/",
+        jsonData,
         {
           method: "POST",
           body: jsonData,
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
         }
       );
       const responseData = await res.json();
 
-      console.log(responseData);
-      // Redirect to a success page or handle accordingly
+      console.log("Response from server:", response.data);
+      window.location.href = "/"; // Redirect to a success page or handle accordingly
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
+        console.log("Response data:", error.response.data);
+        console.log("Status code:", error.response.status);
+        console.log("Headers:", error.response.headers);
       } else if (axios.isCancel(error)) {
         // Handle canceled request
         console.log("Request canceled", error.message);
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.log("Error", error.message);
+        console.log("Error message:", error.message);
       }
       setIsLoading(false);
     }
