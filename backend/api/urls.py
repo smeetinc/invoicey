@@ -75,7 +75,7 @@ def signup():
 		if not user:
 			name = json.get("name")
 			email = json.get("email")
-			busi_nm = json.get("busi_name")
+			busi_nm = json.get("busi_nm")
 			password = json.get("password")
 			hashed = User.generate_hash(password)
 			li_name = name.split()
@@ -122,7 +122,7 @@ def activate_user(token: str):
 		token = User.decode_jwt_token(token)
 		_id = token.get("id")
 		if token and _id:
-			user = User.query.get(_id=token[_id])
+			user = User.query.get(_id=_id)
 			if user:
 				user.is_activated = True
 				db.session.add(user)
@@ -269,7 +269,6 @@ def get_user_data():
 		"name": user.name,
 		"first_name": user.first_name,
 		"last_name": user.last_name,
-		"birth_date": user.birth_date.strftime("%d/%m/%Y"),
 		"email": user.email,
 		"business_name": user.business.name
 	}
