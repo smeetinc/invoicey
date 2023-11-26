@@ -261,7 +261,7 @@ def activate_required():
 		"status": "success",
 	}
 
-@api.post("/get-user-data/")
+@api.get("/get-user-data/")
 @auth.login_required
 def get_user_data():
 	user = auth.current_user()
