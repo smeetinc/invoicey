@@ -133,18 +133,15 @@ class Banks(db.Model, BaseMixin):
             Stores multiple banks data from nubapi
         """
         import requests
-        try:
-            resp = requests.get("https://nubapi.com/banks")
-            json = resp.json()
-            items = json.items
-            unused = [
+        resp = requests.get("https://nubapi.com/banks")
+        json = resp.json()
+        items = json.items
+        unused = [
 
-            ]
-            for code, bank in items:
-                unused.append(cls(name=bank, bank_code=code))
-            db.session.add_all(unused)
-            db.session.commit()
-            return True
-        except:
-            from urllib import request
-            pass
+        ]
+        for code, bank in items:
+            unused.append(cls(name=bank, bank_code=code))
+        db.session.add_all(unused)
+        db.session.commit()
+        return True
+        from urllib import request
