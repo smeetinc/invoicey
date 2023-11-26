@@ -134,7 +134,7 @@ class Banks(db.Model, BaseMixin):
         """
         import requests
         try:
-            resp = requests.get("https://nubapi.com/")
+            resp = requests.get("https://nubapi.com/banks")
             json = resp.json()
             items = json.items
             unused = [
