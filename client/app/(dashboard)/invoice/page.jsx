@@ -10,7 +10,7 @@ import { invoiceSchema } from "@/utils/schemas";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "@/components/Loader";
-const AddInvoiceModal = ({ isOpen, closeModal }) => {
+const AddInvoiceModal = ({ isOpen, closeModal, getInvoices }) => {
   const {
     handleSubmit,
     register,
@@ -40,7 +40,6 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
     getClients();
   }, []);
   const submitHandler = async (data) => {
-    console.log(data);
     const date = new Date(data.dueDate);
     const day = date.getDate();
     const month = date.getMonth() + 1;
@@ -68,7 +67,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
           },
         }
       );
-      console.log(res.data);
+      getInvoices(localStorage.getItem("invc"));
       toast.success("Invoice Created");
       resetAndCloseModal();
     } catch (error) {
@@ -504,7 +503,11 @@ const Invoice = () => {
               </thead>
               <tbody>
                 {invoices.map((invoice, i) => (
-                  <InvoiceRow color={i % 2 !== 0} invoice={invoice} />
+                  <InvoiceRow
+                    color={i % 2 !== 0}
+                    invoice={invoice}
+                    getInvoices={getInvoices}
+                  />
                 ))}
               </tbody>
             </table>

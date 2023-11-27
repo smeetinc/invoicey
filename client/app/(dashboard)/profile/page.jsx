@@ -8,7 +8,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 import Loader from "@/components/Loader";
-const AddInvoiceModal = ({ isOpen, closeModal }) => {
+const AddInvoiceModal = ({ isOpen, closeModal, getAccountDetails }) => {
   const formRef = useRef(null);
   const [bankList, setBankList] = useState([]);
   const [selectedBankCode, setSelectedBankCode] = useState(null);
@@ -55,7 +55,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
           withCredentials: true,
         }
       );
-      console.log(res.data);
+      getAccountDetails();
       toast.success("Account Added");
     } catch (error) {
       console.log(error);
@@ -245,28 +245,28 @@ const Profile = () => {
   const [showAddAccount, SetShowAccount] = useState(false);
   const [accountDetails, setAccountDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const getAccountDetails = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("invc");
-        const res = await axios.get(
-          "https://olatidejosepha.pythonanywhere.com/api/bank/",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const { data } = res;
+  const getAccountDetails = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("invc");
+      const res = await axios.get(
+        "https://olatidejosepha.pythonanywhere.com/api/bank/",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const { data } = res;
 
-        setAccountDetails(data);
-      } catch (error) {
-        console.log(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setAccountDetails(data);
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     getAccountDetails();
   }, []);
   return (
@@ -367,6 +367,7 @@ const Profile = () => {
             <AddInvoiceModal
               closeModal={() => SetShowAccount(false)}
               isOpen={showAddAccount}
+              getAccountDetails={getAccountDetails}
             />
           )}
         </>
