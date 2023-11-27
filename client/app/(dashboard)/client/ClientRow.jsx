@@ -263,7 +263,7 @@ const EditModal = ({ isOpen, closeModal }) => {
     </Dialog>
   );
 };
-const ClientRow = ({ color }) => {
+const ClientRow = ({ color, birth_date, email, gender, name, phone, id }) => {
   const [showActions, setShowActions] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -296,34 +296,34 @@ const ClientRow = ({ color }) => {
       >
         <td>
           <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center">
-            <Link href={"/client/id"} className="underline">
-              EP2347
+            <Link href={`/client/${id}`} className="underline">
+              {id}
             </Link>
           </div>
         </td>
         <td>
           <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 ">
-            <span>Yusuf Ibrahim</span>
+            <span>{name}</span>
           </div>
         </td>
         <td>
           <div className="flex   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 ">
-            <span>Yusuf@gmail.com</span>
+            <span>{email}</span>
           </div>
         </td>
         <td>
           <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 text-center ">
-            <span>+2348167435627</span>
+            <span>+234{phone}</span>
           </div>
         </td>
         <td>
           <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] text-center mr-10 py-4 ">
-            <span>23/06/1889</span>
+            <span>{birth_date}</span>
           </div>
         </td>
         <td>
           <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 text-center ">
-            <span>Female</span>
+            <span>{gender === "F" ? "Female" : "Male"}</span>
           </div>
         </td>
         <td className="relative">

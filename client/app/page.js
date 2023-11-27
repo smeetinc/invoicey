@@ -7,6 +7,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/User";
+import { withOutAuth } from "@/utils/withoutAuth";
 
 function login() {
   const [emailAddress, setEmailAddress] = useState("");
@@ -183,4 +184,4 @@ function login() {
   );
 }
 
-export default login;
+export default withOutAuth(login);

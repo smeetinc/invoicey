@@ -1,15 +1,14 @@
 import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
-export function withAuth(WrappedComponent) {
+export function withOutAuth(WrappedComponent) {
   const Wrapper = (props) => {
-    const route = useRouter();
     const token = localStorage.getItem("invc");
+    const route = useRouter();
     if (!token) {
-      route.replace("/");
-    } else {
       return <WrappedComponent {...props} />;
+    } else {
+      route.replace("/overview");
     }
     return (
       <div className="fixed inset-0 w-screen h-screen z-[9999999] bg-white grid place-items-center">

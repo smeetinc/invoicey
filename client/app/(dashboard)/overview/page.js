@@ -282,4 +282,4 @@ function overview() {
   );
 }
 
-export default overview;
+export default withAuth(overview);
