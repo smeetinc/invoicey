@@ -10,6 +10,7 @@ import { invoiceSchema } from "@/utils/schemas";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Loader from "@/components/Loader";
+import { withAuth } from "@/utils/withAuth";
 const AddInvoiceModal = ({ isOpen, closeModal, getInvoices }) => {
   const {
     handleSubmit,
@@ -526,4 +527,4 @@ const Invoice = () => {
   );
 };
 
-export default Invoice;
+export default withAuth(Invoice);

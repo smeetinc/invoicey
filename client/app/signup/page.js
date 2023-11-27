@@ -5,6 +5,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import { TbEyeSearch } from "react-icons/tb";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { withOutAuth } from "@/utils/withoutAuth";
 
 function signup() {
   const [fullName, setFullName] = useState("");
@@ -301,4 +302,4 @@ function signup() {
   );
 }
 
-export default signup;
+export default withOutAuth(signup);
