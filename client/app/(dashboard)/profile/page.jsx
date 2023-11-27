@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { withAuth } from "@/utils/withAuth";
+
 import Loader from "@/components/Loader";
 const AddInvoiceModal = ({ isOpen, closeModal }) => {
   const formRef = useRef(null);
@@ -375,4 +375,4 @@ const Profile = () => {
   );
 };
 
-export default withAuth(Profile);
+export default Profile;
