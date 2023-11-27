@@ -1,6 +1,6 @@
 from flask import jsonify, make_response, url_for, request, current_app, render_template as render
-from users.models import User, Invoice, Client, Business
-from utils import smtnb, send_mail_text, send_mail
+from users.models import User, Invoice, Client, Business, Transaction
+from utils import smtnb, send_mail_text, send_mail, check_transaction_status
 from main import db, auth
 from .views import (ClientDataAPIView, MultipleClientDataAPIView,
 					BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
@@ -273,6 +273,33 @@ def get_user_data():
 		"business_name": user.business.name
 	}
 	return data
+
+
+@api.get("/update-transaction-status/")
+@auth.login_required
+def update_transaction():
+	merchants_clients = auth.current_user().clients
+	ref = request.args.get("trsc_ref")
+	trsc = Transaction.query.filter_by(trsc_id=ref).first()
+	if trsc.client in merchants_clients:
+		trsc_status = check_transaction_status(ref)
+		if trsc_status['status']:
+			trsc.status = trsc_status['data']['status']
+			db.session.add(trsc)
+			db.session.commit()
+			return {
+				"status": "success",
+				"pay_stats": trsc.status,
+			}
+		return {
+				"status": "network error",
+				"pay_stats": "error",
+                }
+	return {
+		"status": "reference not found",
+		"pay_stats": "error"
+	}
+
 
 # @api.app_errorhandler(500)
 # def internal_error(e):

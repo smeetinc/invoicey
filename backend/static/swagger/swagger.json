@@ -938,6 +938,41 @@
 					}
 				}
 			}
+		},
+		"/api/update-transaction-status/": {
+			"get": {
+				"description": "Gets Transaction status",
+				"parameters": [
+					{ 
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					},
+					{
+						"name": "trsc_ref",
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
