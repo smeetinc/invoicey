@@ -14,7 +14,7 @@ try:
 	resp = requests.post("https://api.paystack.co/transaction/initialize", data=json_data, headers=headers)
 	print(resp.json())
 except requests.exceptions.RequestException as e:
-	print("* Request Error")
+	print(" * Request Error")
 
 
 def create_sub_account(data):
@@ -24,4 +24,4 @@ def create_sub_account(data):
 	JSON = json.dumps(data)
 	resp = requests.post("https://api.paystack.co/subaccount", data=JSON, headers=headers)
 	json_resp = resp.json()
-	json_resp
+	return json_resp

@@ -253,9 +253,9 @@ class BankAPIView(MethodView):
 				other = json.get("other")
 				if acct_num and bank_name and acct_name and first and last:
 					data = {
-						"account_number": str(acct_num),
+						"account_number": acct_num,
 						"business_name": user.business.name,
-						"settlement_bank": f"{bank_code}",
+						"settlement_bank": bank_code,
 						"percentage_charge": 10
 					}
 					bank_account = MerchantBankAccount(acct_num=str(acct_num),
@@ -263,8 +263,8 @@ class BankAPIView(MethodView):
 										last_name=last, other_name=other,
 										merchant=user, acct_name=acct_name,
 										bank_code=bank_code)
-					resp = create_sub_account(data)
-					if resp and resp.get('status'):
+					csa = create_sub_account(data)
+					if csa:
 						db.session.add(bank_account)
 						db.session.commit()
 						return {
