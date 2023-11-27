@@ -58,7 +58,7 @@ function login() {
     try {
       console.log("Sending POST request...");
       const response = await axios.post(
-        "http://olatidejosepha.pythonanywhere.com/api/authenticate/",
+        "https://olatidejosepha.pythonanywhere.com/api/authenticate/",
         jsonData,
         {
           headers: {
@@ -68,12 +68,13 @@ function login() {
       );
 
       console.log("Response from server:", response.data);
+
       window.location.href = "/overview"; // Redirect to a success page or handle accordingly
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {
         // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
+
         console.log("Response data:", error.response.data);
         console.log("Status code:", error.response.status);
         console.log("Headers:", error.response.headers);
@@ -83,6 +84,8 @@ function login() {
       } else {
         // Something happened in setting up the request that triggered an Error
         console.log("Error message:", error.message);
+        //redirect to error page
+        window.location.href = "/error";
       }
       setIsLoading(false);
     }

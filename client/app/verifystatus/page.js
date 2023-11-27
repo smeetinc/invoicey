@@ -39,7 +39,7 @@ const VerifyStatus = () => {
           // Handle verification failure
           console.error("Verification failed:", error);
           // Redirect the user to an error page
-          window.location.href = "/error";
+          //window.location.href = "/error";
         }
       }
     };
