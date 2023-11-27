@@ -9,7 +9,7 @@ import { clientSchema } from "@/utils/schemas";
 import Loader from "@/components/Loader";
 import axios from "axios";
 import toast from "react-hot-toast";
-const AddClientModal = ({ isOpen, closeModal }) => {
+const AddClientModal = ({ isOpen, closeModal, getClients }) => {
   const {
     handleSubmit,
     register,
@@ -43,7 +43,11 @@ const AddClientModal = ({ isOpen, closeModal }) => {
             },
           }
         );
-
+        if (!res.data.created) {
+          toast.error(res.data.message);
+          return;
+        }
+        getClients(localStorage.getItem("invc"));
         toast.success("Client Added");
         reset();
         closeModal();
@@ -238,28 +242,33 @@ const ClientTable = () => {
   const closeClientModal = () => {
     setShowClientModal(false);
   };
+  const getClients = async (token) => {
+    try {
+      const res = await axios.get(
+        "https://olatidejosepha.pythonanywhere.com/api/all-client-data/?page=1",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        }
+      );
+      setClients(res.data.clients);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    const getClients = async () => {
-      try {
-        const res = await axios.get(
-          "https://olatidejosepha.pythonanywhere.com/api/all-client-data/?page=1",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("invc")}`,
-              Accept: "application/json",
-            },
-          }
-        );
-        setClients(res.data.clients);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getClients();
+    getClients(localStorage.getItem("invc"));
   }, []);
   return (
     <>
-      <AddClientModal isOpen={showClientModal} closeModal={closeClientModal} />
+      <AddClientModal
+        isOpen={showClientModal}
+        closeModal={closeClientModal}
+        getClients={getClients}
+      />
       {clients && (
         <section className="py-7 px-6 rounded-xl border  border-grey">
           <div className="flex items-center gap-10 justify-between mb-5">
