@@ -20,16 +20,19 @@ const VerifyStatus = () => {
       if (token) {
         const config = {
           headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${verifyParam}`,
+            "Content-Type": "text/html",
           },
         };
 
         try {
           const response = await axios.post(
             "https://olatidejosepha.pythonanywhere.com/api/activate_required/",
-            {},
-            config
+            "",
+            {
+              Authorization: `Bearer ${verifyParam}`,
+              "Content-Type": "text/html",
+            }
           );
 
           // Handle successful verification
