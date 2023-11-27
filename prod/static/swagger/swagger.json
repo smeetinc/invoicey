@@ -598,22 +598,28 @@
 								"type":"string"
 							},
 							"bank_name": {
-								"type": "string"
+								"type": "string",
+								"example": "Bank Name"
 							},
 							"acct_name": {
-								"type":"string"
+								"type":"string",
+								"example": "Account Name"
 							}, 
 							"bank_code": {
-								"type": "integer"
+								"type": "string",
+								"example": "099"
 							}, 
 							"first_name": {
-								"type": "string"
+								"type": "string",
+								"example": "John"
 							},
 							"last_name": {
-								"type": "string"
+								"type": "string",
+								"example": "Doe"
 							},
 							"other": {
-								"type": "string"
+								"type": "string",
+								"example": "Arthur"
 							}
 						}
 					}
@@ -922,7 +928,7 @@
 						"summary": "returns the current user data",
 						"content":{
 							"application/json":{
-								
+
 							}
 						}
 
