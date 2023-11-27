@@ -1,12 +1,7 @@
+"use client";
 import React from "react";
-import { poppins } from "@/utils/fonts";
-import ClientRow from "./ClientRow";
 import ClientTable from "./ClientTable";
-
-export const metadata = {
-  title: "Clients",
-  description: "This is the clients page",
-};
+import { withAuth } from "@/utils/withAuth";
 
 const Client = () => {
   return (
@@ -19,4 +14,4 @@ const Client = () => {
   );
 };
 
-export default Client;
+export default withAuth(Client);

@@ -2,7 +2,7 @@ import React from "react";
 
 import Image from "next/image";
 
-function verify() {
+function Verify() {
   return (
     <div className="w-full h-screen">
       <div className="bg-white h-16 py-2">
@@ -47,4 +47,4 @@ function verify() {
   );
 }
 
-export default verify;
+export default Verify;
