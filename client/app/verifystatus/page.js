@@ -40,7 +40,7 @@ const VerifyStatus = () => {
           // Handle verification failure
           console.error("Verification failed:", error);
           // Redirect the user to an error page
-          route("/error");
+          // route("/error");
         }
       }
     };

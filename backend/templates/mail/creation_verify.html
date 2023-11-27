@@ -1,18 +1,14 @@
-The mail content for signup verification.
-
-
-Subject: Verify Your Invoicey Account
-
-Dear {user.name},
+<pre>
+Dear {{user.name}},
 
 Thank you for choosing Invoicey! We're excited to have you on board. To ensure the security of your account and get started with our payment management system, we kindly ask you to verify your email address.
 
 *Verification Steps:*
 1. Click on the following link to verify your email address:
-   [Verification Link]
+   <a href='https://invoicey-one.vercel.app/?verify={{token}}'>Verify Email</a>
 
 2. If the link doesn't work, copy and paste the following URL into your browser:
-   [Verification URL]
+   https://invoicey-one.vercel.app/?verify={{token}}
 
 *Please Note:*
 - This link is valid for the next 24 hours.
@@ -21,3 +17,4 @@ Thank you for choosing Invoicey! We're excited to have you on board. To ensure t
 Thank you for being a part of our community. If you have any questions or need assistance, feel free to reply to this email.
 
 Best regards,
+</pre>

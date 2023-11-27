@@ -1,26 +1,24 @@
-Mail content for invoice that will be sent to the client.
-
-Subject: Invoice Notification for [Invoice Number]
-
-Dear [Client's Full Name],
+<pre>
+Dear {{client.name}},
 
 We hope this message finds you well. We wanted to inform you that an invoice has been generated for your recent transaction with [Your Company Name]. Details of the invoice are outlined below:
 
-*Invoice Number:* [Invoice Number]
-*Invoice Date:* [Date]
-*Due Date:* [Due Date]
-*Amount:* [Amount]
+*Invoice Id:* {{invoice.inv_id}}
+*Invoice Date:* {{invoice.created_on.strftime("%d-%m-%Y")}}
+*Due Date:* {{invoice.due_date.strftime("%d-%m-%Y")}}
+*Amount:* {{invoice.amount}}
 
 To view and process this invoice, please follow the link below:
-[Invoice Link]
+<a href="#">Link To Pay For Product</a>
 
 Please ensure that payment is made by the specified due date to avoid any disruptions in your service or account.
 
 If you have any questions or concerns regarding this invoice, feel free to reply to this email, and our team will be happy to assist you.
 
-Thank you for choosing [Your Company Name]. We appreciate your business.
+Thank you for choosing {{invoice.business.name}}. We appreciate your business.
 
 Best regards,
 
-[Your Company Name]
-[Your Contact Information]
+Invoicey
+invoicey@invoicey.com
+</pre>

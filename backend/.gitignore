@@ -1,3 +1,4 @@
-./voicey/*
-./instance/*
+/voicey/*
+/instance/*
 /__pycache__/*
+.env
