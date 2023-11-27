@@ -175,14 +175,14 @@ class InvoiceDataAPIView(MethodView):
 					transaction_ref = secrets.token_hex(16)
 				link = create_transaction_link({
 					"email": client.email,
-					"amount": amount + "00",
+					"amount": int(str(amount) + "00"),
 					"reference": transaction_ref,
 					"metadata": {
 						"business_name": auth.current_user().business.name
 					}
 				})
 				if link['status']:
-					transaction = Transaction(trsc_ref=transaction_ref, status="Pending",
+					transaction = Transaction(trsc_id=transaction_ref, status="Pending",
 								client=client,
 								invoice=invoice, payout=link['data']['authorization_url'])
 					db.session.add_all([invoice, transaction])

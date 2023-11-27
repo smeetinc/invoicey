@@ -285,7 +285,9 @@ def update_transaction():
 		trsc_status = check_transaction_status(ref)
 		if trsc_status['status']:
 			trsc.status = trsc_status['data']['status']
-			db.session.add(trsc)
+			invoice = trsc.invoice
+			invoice.has_paid = True
+			db.session.add_all([invoice, trsc])
 			db.session.commit()
 			return {
 				"status": "success",
