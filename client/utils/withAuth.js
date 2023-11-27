@@ -1,20 +1,31 @@
+"use client"
 import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function withAuth(WrappedComponent) {
   const Wrapper = (props) => {
     const route = useRouter();
-    const token = localStorage.getItem("invc");
-    if (!token) {
-      route.replace("/");
-    } else {
-      return <WrappedComponent {...props} />;
-    }
+    const [loading,setLoading] = useState(true);
+    const [token,setToken]=useState('') 
+useEffect(() => {
+const tokens= localStorage.getItem("invc");
+ if(tokens){
+  setToken(token)
+}else{
+route.replace("/")
+}
+setLoading(false)
+},[])
     return (
-      <div className="fixed inset-0 w-screen h-screen z-[9999999] bg-white grid place-items-center">
+
+     {loading ? <div className="fixed inset-0 w-screen h-screen z-[9999999] bg-white grid place-items-center">
         <Loader />
-      </div>
+      </div> : 
+ <> 
+  {token && <WrappedComponent {...props} />}
+</>
+}
     );
   };
   return Wrapper;
