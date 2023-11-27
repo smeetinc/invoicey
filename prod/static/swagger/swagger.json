@@ -598,22 +598,28 @@
 								"type":"string"
 							},
 							"bank_name": {
-								"type": "string"
+								"type": "string",
+								"example": "Bank Name"
 							},
 							"acct_name": {
-								"type":"string"
+								"type":"string",
+								"example": "Account Name"
 							}, 
 							"bank_code": {
-								"type": "integer"
+								"type": "string",
+								"example": "099"
 							}, 
 							"first_name": {
-								"type": "string"
+								"type": "string",
+								"example": "John"
 							},
 							"last_name": {
-								"type": "string"
+								"type": "string",
+								"example": "Doe"
 							},
 							"other": {
-								"type": "string"
+								"type": "string",
+								"example": "Arthur"
 							}
 						}
 					}
@@ -898,6 +904,72 @@
 					},
 					"401": {
 						"description":"Unauthorized"
+					}
+				}
+			}
+		},
+		"/api/get-user-data/": {
+			"get": {
+				"description": "Gets the authenticated user data",
+				"tags":[
+					"Users"
+				],
+				"parameters":[
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required":true,
+						"type":"string"
+					}
+				],
+				"responses":{
+					"200":{
+						"description": "OK",
+						"summary": "returns the current user data",
+						"content":{
+							"application/json":{
+
+							}
+						}
+
+					},
+					"401":{
+
+					}
+				}
+			}
+		},
+		"/api/update-transaction-status/": {
+			"get": {
+				"description": "Gets Transaction status",
+				"parameters": [
+					{ 
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					},
+					{
+						"name": "trsc_ref",
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								
+							}
+						}
 					}
 				}
 			}

@@ -1,7 +1,7 @@
 <pre>
 Dear {{client.name}},
 
-We hope this message finds you well. We wanted to inform you that an invoice has been generated for your recent transaction with [Your Company Name]. Details of the invoice are outlined below:
+We hope this message finds you well. We wanted to inform you that an invoice has been generated for your recent transaction with {{user.business.name}}. Details of the invoice are outlined below:
 
 *Invoice Id:* {{invoice.inv_id}}
 *Invoice Date:* {{invoice.created_on.strftime("%d-%m-%Y")}}
@@ -9,7 +9,8 @@ We hope this message finds you well. We wanted to inform you that an invoice has
 *Amount:* {{invoice.amount}}
 
 To view and process this invoice, please follow the link below:
-<a href="#">Link To Pay For Product</a>
+<a href="https://invoicey-one.vercel.app/payment/paymentGateway/?ref={{transaction.trsc_id}}&payout={{transaction.payout}}&status={{transaction.status}}">
+    Link To Pay For Product</a>
 
 Please ensure that payment is made by the specified due date to avoid any disruptions in your service or account.
 

@@ -1,6 +1,6 @@
 from flask import jsonify, make_response, url_for, request, current_app, render_template as render
-from users.models import User, Invoice, Client, Business
-from utils import smtnb, send_mail_text, send_mail
+from users.models import User, Invoice, Client, Business, Transaction
+from utils import smtnb, send_mail_text, send_mail, check_transaction_status
 from main import db, auth
 from .views import (ClientDataAPIView, MultipleClientDataAPIView,
 					BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
@@ -75,7 +75,7 @@ def signup():
 		if not user:
 			name = json.get("name")
 			email = json.get("email")
-			busi_nm = json.get("busi_name")
+			busi_nm = json.get("busi_nm")
 			password = json.get("password")
 			hashed = User.generate_hash(password)
 			li_name = name.split()
@@ -122,7 +122,7 @@ def activate_user(token: str):
 		token = User.decode_jwt_token(token)
 		_id = token.get("id")
 		if token and _id:
-			user = User.query.get(_id=token[_id])
+			user = User.query.get(_id=_id)
 			if user:
 				user.is_activated = True
 				db.session.add(user)
@@ -261,12 +261,54 @@ def activate_required():
 		"status": "success",
 	}
 
-@api.app_errorhandler(500)
-def internal_error(e):
+@api.get("/get-user-data/")
+@auth.login_required
+def get_user_data():
+	user = auth.current_user()
+	data = {
+		"name": user.name,
+		"first_name": user.first_name,
+		"last_name": user.last_name,
+		"email": user.email,
+		"business_name": user.business.name
+	}
+	return data
+
+
+@api.get("/update-transaction-status/")
+@auth.login_required
+def update_transaction():
+	merchants_clients = auth.current_user().clients
+	ref = request.args.get("trsc_ref")
+	trsc = Transaction.query.filter_by(trsc_id=ref).first()
+	if trsc.client in merchants_clients:
+		trsc_status = check_transaction_status(ref)
+		if trsc_status['status']:
+			trsc.status = trsc_status['data']['status']
+			invoice = trsc.invoice
+			invoice.has_paid = True
+			db.session.add_all([invoice, trsc])
+			db.session.commit()
+			return {
+				"status": "success",
+				"pay_stats": trsc.status,
+			}
+		return {
+				"status": "network error",
+				"pay_stats": "error",
+                }
 	return {
-		"message": e.name,
-		"code": e.code,
-	}, 500
+		"status": "reference not found",
+		"pay_stats": "error"
+	}
+
+
+# @api.app_errorhandler(500)
+# def internal_error(e):
+# 	return {
+# 		"message": e.name,
+# 		"code": e.code,
+# 	}, 500
 
 @api.app_errorhandler(404)
 def not_found(e):

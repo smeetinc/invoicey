@@ -1,11 +1,14 @@
-from flask import jsonify, make_response, url_for, request, current_app, render_template as render
-from users.models import User, Invoice, Client, Business
-from utils import smtnb, send_mail_text, send_mail
+from werkzeug.security import generate_password_hash
+from flask import (jsonify, make_response, url_for, request,
+				   current_app, render_template as render, abort)
+from users.models import User, Invoice, Client, Business, Transaction
+from utils import smtnb, send_mail_text, send_mail, check_transaction_status, create_transaction_link
 from main import db, auth
 from .views import (ClientDataAPIView, MultipleClientDataAPIView,
 					BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
 from . import api
 import jwt
+import secrets
 import datetime
 
 
@@ -75,7 +78,7 @@ def signup():
 		if not user:
 			name = json.get("name")
 			email = json.get("email")
-			busi_nm = json.get("busi_name")
+			busi_nm = json.get("busi_nm")
 			password = json.get("password")
 			hashed = User.generate_hash(password)
 			li_name = name.split()
@@ -122,7 +125,7 @@ def activate_user(token: str):
 		token = User.decode_jwt_token(token)
 		_id = token.get("id")
 		if token and _id:
-			user = User.query.get(_id=token[_id])
+			user = User.query.get(_id=_id)
 			if user:
 				user.is_activated = True
 				db.session.add(user)
@@ -182,22 +185,41 @@ def reset_password():
 		"message": "JSON data not received"
 	}
 
-@api.post('/verify_reset/<string:token>/<int:_id>')
-def verify_reset(token: str, _id: int):
-	user = User.query.get(_id)
-	data = {
-		"message": "Error with token provided",
-		"valid": False,
-		"changed": False
+@api.post('/verify_reset/<string:token>/<string:password>/')
+def verify_reset(token: str, password: str):
+	message = {
+		"message": "User Password Changed",
+		"status": "error",
+		"changed": True
 	}
-	if user:
-		decoded = user.decode_jwt_token(token)
-		if decoded.get('id') == _id:
-			user.is_activated = True
-			db.session.add(user)
-			db.session.commit()
-			data['message'] = "Validated"
-			return data
+	try:
+		user_id = User.decode_jwt_token(token)
+		if user_id:
+			user_id = user_id['id']
+			user = User.query.get(user_id)
+			if user and not user.is_deleted:
+				user.password = generate_password_hash(password)
+				db.session.add(user)
+				db.session.commit()
+				return message
+			message['message'] = "User not found"
+			message['status'] = "success"
+			message['changed'] = False
+			return message
+	except jwt.ExpiredSignatureError:
+		message['message'] = "Expired user token"
+		message['status'] = " error"
+		message['changed'] = False
+		return message
+	except jwt.InvalidTokenError:
+		message['message'] = "Invalid user token"
+		message['status'] = " error"
+		message['changed'] = False
+		return message
+	except:
+		abort(401, "Error outside of expected token")
+
+
 		
 @api.get('/overview-data/')
 @auth.login_required
@@ -239,6 +261,7 @@ def invoices():
 				'ref_id': invoice.ref_id,
 				'inv_id': invoice.inv_id,
 				'amt': invoice.amount,
+				'description': invoice.description,
 				'has_paid': invoice.has_paid,
 				'py_type': invoice.payment_type,
 			} for invoice in invoices if invoice.user.name == auth.current_user().name
@@ -269,18 +292,117 @@ def get_user_data():
 		"name": user.name,
 		"first_name": user.first_name,
 		"last_name": user.last_name,
-		"birth_date": user.birth_date.strftime("%d/%m/%Y"),
 		"email": user.email,
 		"business_name": user.business.name
 	}
 	return data
 
-@api.app_errorhandler(500)
-def internal_error(e):
+@api.post("/send-trsc-link/")
+@auth.login_required
+def send_trsc_link():
+	json = request.get_json()
+	ref = json['trsc_id']
+	old_trsc = Transaction.query.filter_by(trsc_id=ref).first()
+	if old_trsc:
+		all_trsc = [trsc.trsc_id for trsc in Transaction.query.all()]
+		transaction_ref = secrets.token_hex(16)
+		client = old_trsc.client
+		invoice = invoice.client
+		while (transaction_ref in all_trsc):
+			transaction_ref = secrets.token_hex(16)
+		link = create_transaction_link({
+			"email": client.email,
+			"amount": int(old_trsc.amount),
+			"reference": transaction_ref,
+			"metadata": {
+				"business_name": auth.current_user().business.name
+			}
+		})
+		if link['status']:
+			transaction = Transaction(trsc_id=transaction_ref, status="Pending",
+						client=client,
+						invoice=invoice, payout=link['data']['authorization_url'])
+			invoice.trsc_id = transaction.trsc_id
+			db.session.add_all([invoice, transaction])
+			db.session.commit()
+			#send a nonblocking io mail
+			smtnb(f"Invoice Notification for {invoice.inv_id}",
+				recipients=[client.email],
+				html=render("mail/pay_invoice.html", invoice=invoice, client=client,
+				user=auth.current_user(), transaction=transaction))
+			return {
+				"message": "Mail Sent",
+				"status": "success",
+				"ref": transaction.trsc_id,
+				"inv_id": invoice.inv_id,
+				"old_ref": old_trsc.trsc_id
+			}
+		return {
+			"message": "Error creating transaction link",
+			"status": "error"
+		}
 	return {
-		"message": e.name,
-		"code": e.code,
-	}, 500
+		"message": "No transaction with that ref id",
+		"status": "error"
+	}
+
+
+@api.get("/update-transaction-status/")
+@auth.login_required
+def update_transaction():
+	merchants_clients = auth.current_user().clients
+	ref = request.args.get("trsc_ref")
+	trsc = Transaction.query.filter_by(trsc_id=ref).first()
+	if trsc.client in merchants_clients:
+		trsc_status = check_transaction_status(ref)
+		if trsc_status['status']:
+			trsc.status = trsc_status['data']['status']
+			invoice = trsc.invoice
+			invoice.has_paid = True
+			db.session.add_all([invoice, trsc])
+			db.session.commit()
+			return {
+				"status": "success",
+				"pay_stats": trsc.status,
+			}
+		return {
+				"status": "network error",
+				"pay_stats": "error",
+                }
+	return {
+		"status": "reference not found",
+		"pay_stats": "error"
+	}
+
+@api.get("/trsc-inv-by-ref/")
+@auth.login_required
+def inv_trsc():
+	ref = request.args.get('ref')
+	trsc = Transaction.query.filter_by(trsc_id=ref).first()
+	current_user = auth.current_user()
+	if trsc and trsc.client in current_user.clients:
+		invoice = trsc.invoice
+		return {
+            'trsc_id': invoice.trsc_id,
+			'client_name': invoice.client.name,
+            'type': invoice.payment_type,
+			'ref_id': invoice.ref_id,
+			'inv_id': invoice.inv_id,
+			'amt': invoice.amount,
+			'has_paid': invoice.has_paid,
+			'py_type': invoice.payment_type,
+        }
+	return {
+		"message": "Either an invoice with that ref is not found, or transaction client is not you",
+		"status": "error"
+	}
+
+# @api.app_errorhandler(500)
+# def internal_error(e):
+# 	return {
+# 		"message": e.name,
+# 		"code": e.code,
+# 	}, 500
 
 @api.app_errorhandler(404)
 def not_found(e):

@@ -1,7 +1,7 @@
 from flask.views import MethodView, View
 from flask import request, current_app, url_for, request, render_template as render
-from users.models import Client, User, Invoice, MerchantBankAccount
-from utils import smtnb, create_sub_account
+from users.models import Client, User, Invoice, MerchantBankAccount,  Transaction
+from utils import smtnb, create_sub_account, create_transaction_link
 from main import auth, db
 import datetime
 import secrets
@@ -169,23 +169,50 @@ class InvoiceDataAPIView(MethodView):
 							payment_type=py_type, has_paid=has_paid,
 							due_date=due_date, user=merchant, client=client,
 						business=merchant.business)
-				db.session.add(invoice)
-				db.session.commit()
-				#send a nonblocking io mail
-				smtnb(f"Invoice Notification for {inv_id}",
-					recipients=[client.email],
-					html=render("mail/pay_invoice.html", invoice=invoice, client=client))
+				all_trsc = [trsc.trsc_id for trsc in Transaction.query.all()]
+				transaction_ref = secrets.token_hex(16)
+				while (transaction_ref in all_trsc):
+					transaction_ref = secrets.token_hex(16)
+				link = create_transaction_link({
+					"email": client.email,
+					"amount": int(str(amount) + "00"),
+					"reference": transaction_ref,
+					"metadata": {
+						"business_name": auth.current_user().business.name
+					}
+				})
+				if link['status']:
+					transaction = Transaction(trsc_id=transaction_ref, status="Pending",
+								client=client,
+								invoice=invoice, payout=link['data']['authorization_url'])
+					invoice.trsc_id = transaction.trsc_id
+					db.session.add_all([invoice, transaction])
+					db.session.commit()
+					#send a nonblocking io mail
+					smtnb(f"Invoice Notification for {inv_id}",
+						recipients=[client.email],
+						html=render("mail/pay_invoice.html", invoice=invoice, client=client,
+						user=auth.current_user(), transaction=transaction))
+					return {
+						"message": "invoice created",
+						"status": "success",
+						"created": True
+					}, 201
 				return {
-					"message": "invoice created",
-					"status": "success"
-				}, 201
+						#invoice was not created
+						"message": "Error occured generating a payment link",
+						"status": "error",
+						"created": False
+					}
 			return {
 				"message": "A client with that name is not found",
-				"status": "error"
+				"status": "error",
+				"created":  False
 			}
 		return {
 			"message": "The Json/body data is not posted",
 			"status": "error",
+			"created": False
 		}
 
 
@@ -242,39 +269,45 @@ class BankAPIView(MethodView):
 		json = request.get_json(cache=False)
 		user = auth.current_user()
 		if json:
-			acct_num = json.get("acct_num")
-			bank_name = json.get("bank_name")
-			acct_name = json.get("acct_name")
-			bank_code = json.get("bank_code", type=int),
-			first = json.get("first_name")
-			last = json.get("last_name")
-			other = json.get("other")
-			if acct_num and bank_name and acct_name and first and last:
-				data = {
-					"account_number": str(acct_num),
-					"business_name": user.business.name,
-					"settlement_bank": str(bank_code),
-					"percentage_charge": 10
-				}
-				bank_account = MerchantBankAccount(acct_num=str(acct_num),
-									   bank_name=bank_name, first_name=first,
-									   last_name=last, other=other,
-									   merchant=user, acct_name=acct_name,
-									   bank_code=bank_code)
-				resp = create_sub_account(data)
-				if resp.get('status'):
-					db.session.add(bank_account)
-					db.session.commit()
+			if not user.bank:
+				acct_num = json.get("acct_num")
+				bank_name = json.get("bank_name")
+				acct_name = json.get("acct_name")
+				bank_code = json.get("bank_code")
+				print(bank_code)
+				first = json.get("first_name")
+				last = json.get("last_name")
+				other = json.get("other")
+				if acct_num and bank_name and acct_name and first and last:
+					data = {
+						"account_number": acct_num,
+						"business_name": user.business.name,
+						"settlement_bank": bank_code,
+						"percentage_charge": 10
+					}
+					bank_account = MerchantBankAccount(acct_num=str(acct_num),
+										bank_name=bank_name, first_name=first,
+										last_name=last, other_name=other,
+										merchant=user, acct_name=acct_name,
+										bank_code=bank_code)
+					csa = create_sub_account(data)
+					if csa:
+						db.session.add(bank_account)
+						db.session.commit()
+						return {
+							"message": "Account number added",
+							"status": "success",
+						}
 					return {
-						"message": "Account number added",
-						"status": "success",
+						"message": "Sorry an error occured your bank details have been saved",
+						"status": "error"
 					}
 				return {
-					"message": "Sorry an error occured",
+					"message": "Incomplete data resources",
 					"status": "error"
 				}
 			return {
-				"message": "Incomplete data resources",
+				"message": "Merchant as an account registered please delete to add new one",
 				"status": "error"
 			}
 		return {

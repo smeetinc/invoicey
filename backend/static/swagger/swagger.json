@@ -598,22 +598,28 @@
 								"type":"string"
 							},
 							"bank_name": {
-								"type": "string"
+								"type": "string",
+								"example": "Bank Name"
 							},
 							"acct_name": {
-								"type":"string"
+								"type":"string",
+								"example": "Account Name"
 							}, 
 							"bank_code": {
-								"type": "integer"
+								"type": "string",
+								"example": "099"
 							}, 
 							"first_name": {
-								"type": "string"
+								"type": "string",
+								"example": "John"
 							},
 							"last_name": {
-								"type": "string"
+								"type": "string",
+								"example": "Doe"
 							},
 							"other": {
-								"type": "string"
+								"type": "string",
+								"example": "Arthur"
 							}
 						}
 					}
@@ -922,12 +928,120 @@
 						"summary": "returns the current user data",
 						"content":{
 							"application/json":{
-								
+
 							}
 						}
 
 					},
 					"401":{
+
+					}
+				}
+			}
+		},
+		"/api/update-transaction-status/": {
+			"get": {
+				"description": "Gets Transaction status",
+				"parameters": [
+					{ 
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					},
+					{
+						"name": "trsc_ref",
+						"in": "query",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								
+							}
+						}
+					}
+				}
+			}
+		},
+		"/update-transaction-status/": {
+			"get": {
+				"description": "Gets the transaction status",
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					},
+					{
+						"name": "trsc_id",
+						"in": "query",
+						"required": true
+					}
+				],
+				"tags": [
+					"Payments"
+				],
+				"responses": {
+					"200": {	
+						"description": "OK",
+						"content":{
+							"application/json":{
+
+							}
+						}
+					},
+					"401": {
+
+					}
+				}
+			}
+		},
+		"/send-trsc-link/": {
+			"post": {
+				"description": "Resends another trsc link",
+				"tags":[
+					"Payments"
+				],
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					},
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"type": "object",
+						"properties": {
+							"trsc_ref": {
+								"type":"string",
+								"example":"some long token" 
+							}
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json":{
+
+							}
+						}
+					},
+					"401": {
 
 					}
 				}

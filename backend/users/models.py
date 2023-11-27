@@ -89,11 +89,12 @@ class Client(db.Model, BaseMixin):
     phone = db.Column(db.String(13))
     user_id = db.Column(db.Integer, db.ForeignKey("users._id"), nullable=False)
     invoices = db.relationship("Invoice", backref="client", lazy=True)
+    transaction = db.relationship("Transaction", backref="client", lazy=True)
 
 class Invoice(db.Model, BaseMixin):
     __tablename__ = "invoices"
     ref_id = db.Column(db.Text, unique=True)
-    trsc_id = db.Column(db.Integer, unique=True)
+    trsc_id = db.Column(db.Text, unique=True)
     inv_id = db.Column(db.Text, unique=True)
     product = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
@@ -105,12 +106,15 @@ class Invoice(db.Model, BaseMixin):
     payment_type = db.Column(db.String(50), default="Transfer", nullable=False)
     due_date = db.Column(db.Date, nullable=False)
     created_on = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    transaction = db.relationship("Transaction", backref="invoice", lazy=True)
 
 class Transaction(db.Model, BaseMixin):
     __tablename__ = "transactions"
-    trsc_id = db.Column(db.Integer, unique=True)
+    trsc_id = db.Column(db.Text, unique=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices._id'))
     client_id = db.Column(db.Integer, db.ForeignKey('clients._id'))
+    status = db.Column(db.Text)
+    payout = db.Column(db.String(120))
 
 class MerchantBankAccount(db.Model, BaseMixin):
     __tablename__ = "merchant_bank_account"
