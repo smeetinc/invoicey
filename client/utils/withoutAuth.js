@@ -3,18 +3,19 @@ import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export function withAuth(WrappedComponent) {
+export function withOutAuth(WrappedComponent) {
   const Wrapper = (props) => {
     const route = useRouter();
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState("");
     useEffect(() => {
       const tokens = localStorage.getItem("invc");
+      console.log(tokens);
       if (tokens) {
-        route.replace("/");
+        route.replace("/overview");
       } else {
-        setToken(tokens);
         setLoading(false);
+        setToken(tokens);
       }
     }, []);
     return loading ? (

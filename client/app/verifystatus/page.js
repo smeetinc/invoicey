@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import axios from "axios";
 import { useRouter as navigate, useSearchParams } from "next/navigation";
+import { withOutAuth } from "@/utils/withoutAuth";
 
 const VerifyStatus = () => {
   const { replace } = navigate();
@@ -60,4 +61,4 @@ const VerifyStatus = () => {
   );
 };
 
-export default VerifyStatus;
+export default withOutAuth(VerifyStatus);

@@ -5,7 +5,7 @@ import { LuArrowUpDown } from "react-icons/lu";
 import "./table.css";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-
+import { withAuth } from "@/utils/withAuth";
 
 function overview() {
   let entries = [
@@ -282,4 +282,4 @@ function overview() {
   );
 }
 
-export default overview;
+export default withAuth(overview);

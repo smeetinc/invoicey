@@ -2,11 +2,12 @@
 import { poppins } from "@/utils/fonts";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function DashboardLayout({ children }) {
   const [active, setActive] = useState("/overview");
-
+  const { replace } = useRouter();
   const handleClick = (path) => {
     setActive(path);
   };
@@ -103,7 +104,11 @@ export default function DashboardLayout({ children }) {
                     ? "font-poppins text-secondary text-base font-semibold flex gap-[14.62px] items-center"
                     : "font-poppins text-background text-base font-semibold flex gap-[14.62px] items-center hover:text-secondary"
                 }
-                onClick={() => handleClick("/logout")}
+                onClick={() => {
+                  handleClick("/logout");
+                  localStorage.setItem("invc", "");
+                  replace("/");
+                }}
               >
                 <svg
                   fill="none"
