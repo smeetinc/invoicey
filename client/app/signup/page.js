@@ -88,7 +88,7 @@ function signup() {
       //const responseData = await response.json();
 
       console.log("Response from server:", response.data);
-      //window.location.href = "/verify"; // Redirect to a success page or handle accordingly
+      window.location.href = "/verify"; // Redirect to a success page or handle accordingly
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {

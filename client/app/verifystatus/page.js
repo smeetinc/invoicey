@@ -20,7 +20,7 @@ const VerifyStatus = () => {
         const config = {
           headers: {
             Authorization: `Bearer ${verifyParam}`,
-            "Content-Type": "application/json",
+            "Content-Type": "text/html",
           },
         };
 
@@ -28,7 +28,10 @@ const VerifyStatus = () => {
           const response = await axios.post(
             "https://olatidejosepha.pythonanywhere.com/api/activate_required/",
             "",
-            config
+            {
+              Authorization: `Bearer ${verifyParam}`,
+              "Content-Type": "text/html",
+            }
           );
 
           // Handle successful verification
