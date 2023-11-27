@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { TbEyeSearch } from "react-icons/tb";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 function signup() {
   const [fullName, setFullName] = useState("");

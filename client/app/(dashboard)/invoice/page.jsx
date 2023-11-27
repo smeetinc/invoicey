@@ -2,11 +2,14 @@
 import InvoiceRow from "./InvoiceRow";
 import { poppins } from "@/utils/fonts";
 import { Dialog } from "@headlessui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { invoiceSchema } from "@/utils/schemas";
+import axios from "axios";
+import toast from "react-hot-toast";
+import Loader from "@/components/Loader";
 const AddInvoiceModal = ({ isOpen, closeModal }) => {
   const {
     handleSubmit,
@@ -14,21 +17,84 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
     formState: { errors },
     reset,
   } = useForm({ resolver: zodResolver(invoiceSchema) });
-  const submitHandler = (data) => {
+  const [clients, setClients] = useState([]);
+  const [sending, setSending] = useState(false);
+  useEffect(() => {
+    const getClients = async () => {
+      try {
+        const res = await axios.get(
+          "https://olatidejosepha.pythonanywhere.com/api/all-client-data/?page=1",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("invc")}`,
+              Accept: "application/json",
+            },
+          }
+        );
+        console.log(res.data);
+        setClients(res.data.clients);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getClients();
+  }, []);
+  const submitHandler = async (data) => {
     console.log(data);
-    reset();
+    const date = new Date(data.dueDate);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const mainData = {
+      product_name: data.paymentFor,
+      description: data.description,
+      client_name: data.clientName,
+      amount: data.amount,
+      has_paid: false,
+      due_date: `${day}/${month}/${year}`,
+      py_type: "Transfer",
+    };
+    console.log(mainData);
+    try {
+      setSending(true);
+      const res = await axios.post(
+        `https://olatidejosepha.pythonanywhere.com/api/invoice/`,
+        JSON.stringify(mainData),
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("invc")}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+      console.log(res.data);
+      toast.success("Invoice Created");
+      resetAndCloseModal();
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setSending(false);
+    }
   };
+
   const resetAndCloseModal = () => {
     reset();
     closeModal();
   };
+
   return (
     <Dialog open={isOpen} onClose={resetAndCloseModal}>
       <div
         className="fixed z-50 inset-0 bg-black/30 w-screen h-screen grid place-items-center"
         aria-hidden="true"
       >
-        <Dialog.Panel className="bg-white text-dark p-6 rounded-lg w-[90%] max-w-2xl ">
+        <Dialog.Panel className="bg-white text-dark p-6 rounded-lg w-[90%] max-w-2xl relative ">
+          {sending && (
+            <div className="bg-white/50 inset-0 w-full h-full grid place-items-center z-50 absolute">
+              <Loader />
+            </div>
+          )}
           <Dialog.Title className={"flex items-start justify-between mb-5"}>
             <div>
               <div className="p-3 rounded-xl border border-[#E4E7EC] mb-4 w-fit">
@@ -92,13 +158,17 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
                   <option
                     value=""
                     className="text-grey"
+                    selected
                     hidden
                     disabled
-                    selected
                   >
                     Select Client Name
                   </option>
-                  <option value="gideon">Gideon</option>
+                  {clients.map((client) => (
+                    <option value={client.name} key={client.id}>
+                      {client.name}
+                    </option>
+                  ))}
                 </select>
 
                 {errors.clientName && (
@@ -219,12 +289,31 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
 };
 const Invoice = () => {
   const [showAddInvoice, setShowAddInvoice] = useState(false);
+  const [invoices, setInvoices] = useState([]);
   const openAddInvoiceModal = () => {
     setShowAddInvoice(true);
   };
   const closeAddInvoiceModal = () => {
     setShowAddInvoice(false);
   };
+  const getInvoices = async (token) => {
+    try {
+      const res = await axios.get(
+        "https://olatidejosepha.pythonanywhere.com/api/invoices-data/?page=1",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setInvoices(res.data.invoices);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getInvoices(localStorage.getItem("invc"));
+  }, []);
   return (
     <>
       <AddInvoiceModal
@@ -273,156 +362,162 @@ const Invoice = () => {
             </button>
           </div>
         </div>
-        <table className="w-full overflow-auto max-w-7xl px-1 rounded-md border border-grey  mb-8  ">
-          <thead>
-            <tr>
-              <th>
-                <div className="flex text-centerx   pl-4  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 whitespace-nowrap">
-                  <span>Invoice ID</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="13"
-                    height="13"
-                    viewBox="0 0 13 13"
-                    fill="none"
-                  >
-                    <path
-                      d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </div>
-              </th>
+        {invoices.length > 0 && (
+          <>
+            <table className="w-full overflow-auto max-w-7xl px-1 rounded-md border border-grey  mb-8  ">
+              <thead>
+                <tr>
+                  <th>
+                    <div className="flex text-centerx   pl-4  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 whitespace-nowrap">
+                      <span>Invoice ID</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 13 13"
+                        fill="none"
+                      >
+                        <path
+                          d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </div>
+                  </th>
 
-              <th>
-                <div className="flex justify-center   items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
-                  <span>Created</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="13"
-                    height="13"
-                    viewBox="0 0 13 13"
-                    fill="none"
-                  >
-                    <path
-                      d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th>
-                <div className="flex justify-center  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
-                  <span>Due date</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="13"
-                    height="13"
-                    viewBox="0 0 13 13"
-                    fill="none"
-                  >
-                    <path
-                      d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th>
-                <div className="flex justify-center  text-center mx-4  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
-                  <span>Description</span>
-                </div>
-              </th>
-              <th>
-                <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
-                  <span>Amount</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="13"
-                    height="13"
-                    viewBox="0 0 13 13"
-                    fill="none"
-                  >
-                    <path
-                      d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th>
-                <div className="flex justify-center  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
-                  <span>Status</span>
-                </div>
-              </th>
+                  <th>
+                    <div className="flex justify-center   items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
+                      <span>Created</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 13 13"
+                        fill="none"
+                      >
+                        <path
+                          d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </div>
+                  </th>
+                  <th>
+                    <div className="flex justify-center  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
+                      <span>Due date</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 13 13"
+                        fill="none"
+                      >
+                        <path
+                          d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </div>
+                  </th>
+                  <th>
+                    <div className="flex justify-center  text-center mx-4  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
+                      <span>Description</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div className="flex  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
+                      <span>Amount</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="13"
+                        height="13"
+                        viewBox="0 0 13 13"
+                        fill="none"
+                      >
+                        <path
+                          d="M9.71816 2.41846C9.96797 2.41846 10.1744 2.60409 10.2071 2.84493L10.2116 2.91189V11.8711C10.2116 12.1437 9.99068 12.3646 9.71816 12.3646C9.46836 12.3646 9.26191 12.1789 9.22924 11.9381L9.22473 11.8711V2.91189C9.22473 2.63937 9.44565 2.41846 9.71816 2.41846Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M12.0511 8.82844C12.2433 8.63529 12.5558 8.63457 12.7489 8.82682C12.9245 9.0016 12.941 9.27569 12.7982 9.46919L12.7505 9.52464L10.0677 12.2199C9.89236 12.396 9.61718 12.412 9.42369 12.2679L9.36827 12.2199L6.68547 9.52464C6.49321 9.3315 6.49394 9.01907 6.68708 8.82682C6.86266 8.65205 7.13682 8.63676 7.32966 8.78053L7.38489 8.82844L9.71769 11.1719L12.0511 8.82844Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M3.18606 0.633301C3.43586 0.633301 3.64231 0.818932 3.67499 1.05978L3.67949 1.12673V10.086C3.67949 10.3585 3.45857 10.5794 3.18606 10.5794C2.93625 10.5794 2.7298 10.3938 2.69713 10.1529L2.69263 10.086V1.12673C2.69263 0.854218 2.91354 0.633301 3.18606 0.633301Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M2.83653 0.778631C3.01188 0.602473 3.28705 0.586459 3.48055 0.730588L3.53596 0.778631L6.21877 3.47386C6.41102 3.66701 6.4103 3.97943 6.21716 4.17168C6.04157 4.34645 5.76741 4.36175 5.57457 4.21797L5.51934 4.17007L3.1861 1.82587L0.853156 4.17007C0.678382 4.34565 0.404293 4.36221 0.210792 4.21933L0.15534 4.17168C-0.0202437 3.99691 -0.0368025 3.72282 0.106079 3.52932L0.153727 3.47386L2.83653 0.778631Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </div>
+                  </th>
+                  <th>
+                    <div className="flex justify-center  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
+                      <span>Status</span>
+                    </div>
+                  </th>
 
-              <th>
-                <div className="flex pr-2  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
-                  <span>Action</span>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <InvoiceRow color={true} />
-          </tbody>
-        </table>
-        <div className="flex border border-grey px-4 w-fit rounded-md">
-          <button className=" text-sm font-normal tracking-[0.25px] text-grey py-4 border-r border-r-grey pr-4">
-            Previous
-          </button>
-          <button className=" pl-4 text-sm font-normal tracking-[0.25px] text-dark py-4 ">
-            Next
-          </button>
-        </div>
+                  <th>
+                    <div className="flex pr-2  items-center gap-2 text-dark font-bold text-base  tracking-[0.32px]  py-4 ">
+                      <span>Action</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoices.map((invoice, i) => (
+                  <InvoiceRow color={i % 2 !== 0} invoice={invoice} />
+                ))}
+              </tbody>
+            </table>
+            <div className="flex border border-grey px-4 w-fit rounded-md">
+              <button className=" text-sm font-normal tracking-[0.25px] text-grey py-4 border-r border-r-grey pr-4">
+                Previous
+              </button>
+              <button className=" pl-4 text-sm font-normal tracking-[0.25px] text-dark py-4 ">
+                Next
+              </button>
+            </div>
+          </>
+        )}
       </section>
     </>
   );

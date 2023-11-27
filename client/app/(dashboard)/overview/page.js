@@ -1,7 +1,11 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { LuArrowUpDown } from "react-icons/lu";
 import "./table.css";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
 
 function overview() {
   let entries = [
@@ -96,6 +100,7 @@ function overview() {
       },
     ],
   ];
+
   let Total = entries.length;
   console.log(Total);
   console.log(entries[3][0].id);
@@ -104,8 +109,33 @@ function overview() {
   let start = (page - 1) * per_page;
   let end = Math.min(start + per_page, Total);
   let paginated_entries = entries.slice(start, end);
-  console.log(paginated_entries);
+  const route = useRouter();
 
+  useEffect(() => {
+    const controller = new AbortController();
+    const getOverview = async () => {
+      try {
+        const token = localStorage.getItem("invc");
+        if (!token) return;
+        const res = await axios.get(
+          `https://olatidejosepha.pythonanywhere.com/api/overview-data/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Activated: "ccrf",
+            },
+            withCredentials: true,
+            signal: controller.signal,
+          }
+        );
+        console.log(res.data);
+      } catch (error) {
+        console.log(error.message, error);
+      }
+    };
+    getOverview();
+    return () => controller.abort();
+  }, []);
   return (
     <div className="flex">
       {/*----Main screen for overview here ----*/}

@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+
+import Loader from "@/components/Loader";
 const AddInvoiceModal = ({ isOpen, closeModal }) => {
   const formRef = useRef(null);
   const [bankList, setBankList] = useState([]);
@@ -16,7 +18,7 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
     formRef.current?.reset();
     closeModal();
   };
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     if (!selectedBankCode) {
       toast.error("Select Your Bank");
@@ -31,14 +33,33 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
     }
 
     const data = {
-      account_number: accountNumber,
-      account_name: accountDetails?.account_name,
+      acct_num: accountNumber,
+      acct_name: accountDetails?.account_name,
       bank_name: accountDetails?.Bank_name,
       bank_code: selectedBankCode,
+      first_name: accountDetails?.first_name,
+      last_name: accountDetails?.last_name,
+      other: accountDetails?.other_name || "",
     };
-
-    toast.success("Account Added");
-    resetAndCloseModal();
+    try {
+      const token = localStorage.getItem("invc");
+      const jsonData = JSON.stringify(data);
+      const res = await axios.post(
+        "https://olatidejosepha.pythonanywhere.com/api/bank/",
+        jsonData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      console.log(res.data);
+      toast.success("Account Added");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -222,6 +243,32 @@ const AddInvoiceModal = ({ isOpen, closeModal }) => {
 };
 const Profile = () => {
   const [showAddAccount, SetShowAccount] = useState(false);
+  const [accountDetails, setAccountDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const getAccountDetails = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("invc");
+        const res = await axios.get(
+          "https://olatidejosepha.pythonanywhere.com/api/bank/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const { data } = res;
+
+        setAccountDetails(data);
+      } catch (error) {
+        console.log(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getAccountDetails();
+  }, []);
   return (
     <>
       <div className="flex items-center gap-4 mb-8">
@@ -241,45 +288,89 @@ const Profile = () => {
           Profile
         </h1>
       </div>
-      <section className="flex ">
-        <div className="basis-1/3"></div>
-        <div className="flex-1">
-          <nav className="mb-6">
-            <ul className="flex gap-9 px-8 py-4 bg-background">
-              <li className="text-primary font-bold text-base tracking-wider">
-                Payment
-              </li>
-              <li className="text-grey font-normal  text-base leading-6 tracking-wider">
-                Settings
-              </li>
-              <li className="text-grey font-normal  text-base leading-6 tracking-wider">
-                Others
-              </li>
-            </ul>
-          </nav>
-          <div className="px-5 flex flex-col justify-between gap-32">
-            <p className="text-black text-base font-medium leading-8 tracking-wide max-w-[657px]">
-              Your payment information is encrypted and securely stored. You can
-              manage and update your payment account anytime.
-            </p>
-            <div className="w-fit mx-auto">
-              <p className="text-black text-base font-medium leading-8 tracking-wide max-w-[657px] text-center mb-5">
-                No Payment Account Yet
-              </p>
-              <button
-                className="text-white bg-primary  font-semibold text-base text-center leading-7 tracking-wide grid place-items-center px-10 py-3  rounded-lg w-fit max-w-[500px]"
-                onClick={() => SetShowAccount(true)}
-              >
-                Add Payment Account
-              </button>
-            </div>
-          </div>
+      {loading ? (
+        <div className="fixed inset-0 w-screen h-screen z-[9999999] bg-white grid place-items-center">
+          <Loader />
         </div>
-      </section>
-      <AddInvoiceModal
-        closeModal={() => SetShowAccount(false)}
-        isOpen={showAddAccount}
-      />
+      ) : (
+        <>
+          <section className="flex ">
+            <div className="basis-1/3"></div>
+            <div className="flex-1">
+              <nav className="mb-6">
+                <ul className="flex gap-9 px-8 py-4 bg-background">
+                  <li className="text-primary font-bold text-base tracking-wider">
+                    Payment
+                  </li>
+                  <li className="text-grey font-normal  text-base leading-6 tracking-wider">
+                    Settings
+                  </li>
+                  <li className="text-grey font-normal  text-base leading-6 tracking-wider">
+                    Others
+                  </li>
+                </ul>
+              </nav>
+              <div className="px-5  flex-col justify-between gap-32">
+                <p className="text-black text-base font-medium leading-8 tracking-wide max-w-[657px]">
+                  Your payment information is encrypted and securely stored. You
+                  can manage and update your payment account anytime.
+                </p>
+
+                {accountDetails ? (
+                  <div className=" my-10">
+                    <h2 className="text-black text-base font-bold mb-4">
+                      Account Details
+                    </h2>
+                    <div className="flex flex-col gap-1 mb-4">
+                      <span className="text-grey font-medium text-base">
+                        Account Name:
+                      </span>
+                      <span className="text-black font-medium text-base">
+                        {accountDetails?.acct_name}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1 mb-4">
+                      <span className="text-grey font-medium text-base">
+                        Account Number :
+                      </span>
+                      <span className="text-black font-medium text-base">
+                        {accountDetails?.acct_num}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1 mb-4">
+                      <span className="text-grey font-medium text-base">
+                        Bank Name :
+                      </span>
+                      <span className="text-black font-medium text-base">
+                        {accountDetails?.bank_name}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-fit mx-auto">
+                    <p className="text-black text-base font-medium leading-8 tracking-wide max-w-[657px] text-center mb-5">
+                      No Payment Account Yet
+                    </p>
+                    <button
+                      className="text-white bg-primary  font-semibold text-base text-center leading-7 tracking-wide grid place-items-center px-10 py-3  rounded-lg w-fit max-w-[500px]"
+                      onClick={() => SetShowAccount(true)}
+                    >
+                      Add Payment Account
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {!accountDetails && (
+            <AddInvoiceModal
+              closeModal={() => SetShowAccount(false)}
+              isOpen={showAddAccount}
+            />
+          )}
+        </>
+      )}
     </>
   );
 };

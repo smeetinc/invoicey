@@ -2,21 +2,22 @@
 "use client";
 import { useEffect } from "react";
 import axios from "axios";
+import { useRouter as navigate, useSearchParams } from "next/navigation";
 
 const VerifyStatus = () => {
+  const { replace } = navigate();
+  const route = useSearchParams();
   useEffect(() => {
     const verifyUser = async () => {
       // Get the query string from the address bar
-      const queryString = window.location.search;
 
       // Extract the verify value from the query string
-      const verifyParam = new URLSearchParams(queryString).get("verify");
 
       // Log the verify value
-      console.log("Verify value:", verifyParam);
 
       // Make a POST request to the verification endpoint
-      if (verifyParam) {
+      const token = route.get("verify");
+      if (token) {
         const config = {
           headers: {
             Authorization: `Bearer ${verifyParam}`,
@@ -37,12 +38,12 @@ const VerifyStatus = () => {
           // Handle successful verification
           console.log("Verification successful:", response.data);
           // home page
-          window.location.href = "/";
+          replace("/");
         } catch (error) {
           // Handle verification failure
           console.error("Verification failed:", error);
           // Redirect the user to an error page
-          //window.location.href = "/error";
+          // route("/error");
         }
       }
     };
