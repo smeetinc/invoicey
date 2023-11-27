@@ -19,6 +19,7 @@ function signup() {
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
   const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -84,7 +85,7 @@ function signup() {
           },
         }
       );
-      const responseData = await res.json();
+      //const responseData = await response.json();
 
       console.log("Response from server:", response.data);
       //window.location.href = "/verify"; // Redirect to a success page or handle accordingly
@@ -96,6 +97,7 @@ function signup() {
         console.log("Response data:", error.response.data);
         console.log("Status code:", error.response.status);
         console.log("Headers:", error.response.headers);
+        setMessage(error.response.data.message);
       } else if (axios.isCancel(error)) {
         // Handle canceled request
         console.log("Request canceled", error.message);
@@ -131,154 +133,165 @@ function signup() {
           </p>
 
           <div>
-            <form className="" id="form" onSubmit={handleSubmit}>
-              <div className="input-control">
-                <label htmlFor="fullName" className="">
-                  Full Name
-                </label>
-                <br />
-                <input
-                  className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
-                  type="text"
-                  placeholder="Olajide Jacob"
-                  name="fullName"
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                />
-                <div className="text-error font-light text-sm">{errorName}</div>
-              </div>
-              <div className="mt-2 input-control">
-                <label htmlFor="businessName" className="">
-                  Business Name
-                </label>
-                <br />
-                <input
-                  className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
-                  type="text"
-                  placeholder="Olajide Jacob"
-                  name="businessName"
-                  id="businessName"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  required
-                />
-                <div className="text-error text-sm font-light">
-                  {errorBusiness}
+            <div>
+              {message ? (
+                <div className="bg-warning p-4 w-4/5 rounded shadow-md delay-1000 mx-auto duration-300 my-4">
+                  {message}
                 </div>
-              </div>
-              <div className="mt-2 input-control">
-                <label htmlFor="emailAddress">Email Address</label>
-                <br />
-                <input
-                  className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
-                  type="email"
-                  placeholder="Olajide Jacob"
-                  name="emailAddress"
-                  id="emailAddress"
-                  value={emailAddress}
-                  onChange={(e) => setEmailAddress(e.target.value)}
-                  required
-                />
-                <div className="text-error font-light text-sm">
-                  {errorEmail}
-                </div>
-              </div>
-              <div className="mt-2 input-control">
-                <label htmlFor="password">Password</label>
-                <br />
-                <div
-                  className="focus-within:border-2 border-primary flex justify-between shadow focus:border-2 active:border-2 active:border-primary rounded w-full py-2 px-3 text-dark leading-tight focus:border-primary focus:shadow-outline default:border-primary my-1"
-                  id="password"
-                >
+              ) : (
+                ""
+              )}
+              <form className="" id="form" onSubmit={handleSubmit}>
+                <div className="input-control">
+                  <label htmlFor="fullName" className="">
+                    Full Name
+                  </label>
+                  <br />
                   <input
-                    className="focus:outline-none"
-                    type={show ? "text" : "password"}
-                    name="password"
-                    id="pwd"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
+                    type="text"
+                    placeholder="Olajide Jacob"
+                    name="fullName"
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     required
                   />
-                  {show ? (
-                    <FaRegEyeSlash
-                      onClick={() => {
-                        setShow(false);
-                      }}
-                    />
-                  ) : (
-                    <TbEyeSearch
-                      onClick={() => {
-                        setShow(true);
-                      }}
-                    />
-                  )}
+                  <div className="text-error font-light text-sm">
+                    {errorName}
+                  </div>
                 </div>
-                <div className="text-error font-light text-sm">
-                  {errorPassword}
-                </div>
-              </div>
-
-              <div className="my-2 input-control">
-                <label htmlFor="conPassword">Confirm Password</label>
-                <br />
-                <div
-                  id="conPassword"
-                  className="focus-within:border-2 border-primary flex justify-between shadow focus:border-2 active:border-2 active:border-primary rounded w-full py-2 px-3 text-dark leading-tight focus:border-primary focus:shadow-outline default:border-primary my-1"
-                >
+                <div className="mt-2 input-control">
+                  <label htmlFor="businessName" className="">
+                    Business Name
+                  </label>
+                  <br />
                   <input
-                    className="focus:outline-none"
-                    type={show ? "text" : "password"}
-                    name="conPassword"
-                    id="conpwd"
-                    value={conPassword}
-                    onChange={(e) => setConPassword(e.target.value)}
+                    className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
+                    type="text"
+                    placeholder="Olajide Jacob"
+                    name="businessName"
+                    id="businessName"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
                     required
                   />
-                  {show ? (
-                    <FaRegEyeSlash
-                      onClick={() => {
-                        setShow(false);
-                      }}
-                    />
-                  ) : (
-                    <TbEyeSearch
-                      onClick={() => {
-                        setShow(true);
-                      }}
-                    />
-                  )}
+                  <div className="text-error text-sm font-light">
+                    {errorBusiness}
+                  </div>
                 </div>
-                <div className="text-error font-light text-sm">
-                  {errorConfirmPassword}
+                <div className="mt-2 input-control">
+                  <label htmlFor="emailAddress">Email Address</label>
+                  <br />
+                  <input
+                    className="shadow border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-primary focus:shadow-outline my-1"
+                    type="email"
+                    placeholder="Olajide Jacob"
+                    name="emailAddress"
+                    id="emailAddress"
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
+                    required
+                  />
+                  <div className="text-error font-light text-sm">
+                    {errorEmail}
+                  </div>
                 </div>
-              </div>
-
-              <div className="my-2">
-                {isLoading ? (
-                  <button className="bg-primary text-white px-auto py-3 w-full rounded cursor-pointer my-2">
-                    Please wait...
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className="bg-primary text-white px-auto py-3 w-full rounded cursor-pointer my-2"
+                <div className="mt-2 input-control">
+                  <label htmlFor="password">Password</label>
+                  <br />
+                  <div
+                    className="focus-within:border-2 border-primary flex justify-between shadow focus:border-2 active:border-2 active:border-primary rounded w-full py-2 px-3 text-dark leading-tight focus:border-primary focus:shadow-outline default:border-primary my-1"
+                    id="password"
                   >
-                    Continue
-                  </button>
-                )}
+                    <input
+                      className="focus:outline-none"
+                      type={show ? "text" : "password"}
+                      name="password"
+                      id="pwd"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    {show ? (
+                      <FaRegEyeSlash
+                        onClick={() => {
+                          setShow(false);
+                        }}
+                      />
+                    ) : (
+                      <TbEyeSearch
+                        onClick={() => {
+                          setShow(true);
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div className="text-error font-light text-sm">
+                    {errorPassword}
+                  </div>
+                </div>
+
+                <div className="my-2 input-control">
+                  <label htmlFor="conPassword">Confirm Password</label>
+                  <br />
+                  <div
+                    id="conPassword"
+                    className="focus-within:border-2 border-primary flex justify-between shadow focus:border-2 active:border-2 active:border-primary rounded w-full py-2 px-3 text-dark leading-tight focus:border-primary focus:shadow-outline default:border-primary my-1"
+                  >
+                    <input
+                      className="focus:outline-none"
+                      type={show ? "text" : "password"}
+                      name="conPassword"
+                      id="conpwd"
+                      value={conPassword}
+                      onChange={(e) => setConPassword(e.target.value)}
+                      required
+                    />
+                    {show ? (
+                      <FaRegEyeSlash
+                        onClick={() => {
+                          setShow(false);
+                        }}
+                      />
+                    ) : (
+                      <TbEyeSearch
+                        onClick={() => {
+                          setShow(true);
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div className="text-error font-light text-sm">
+                    {errorConfirmPassword}
+                  </div>
+                </div>
+
+                <div className="my-2">
+                  {isLoading ? (
+                    <button className="bg-primary text-white px-auto py-3 w-full rounded cursor-pointer my-2">
+                      Please wait...
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      className="bg-primary text-white px-auto py-3 w-full rounded cursor-pointer my-2"
+                    >
+                      Continue
+                    </button>
+                  )}
+                </div>
+              </form>
+              <div className="text-center my-2">
+                <small className="text-center">
+                  Already have an Account?&nbsp;
+                  <a href="/">
+                    <span className="text-primary font-bold cursor-pointer">
+                      Sign in
+                    </span>
+                  </a>
+                </small>
               </div>
-            </form>
-            <div className="text-center my-2">
-              <small className="text-center">
-                Already have an Account?&nbsp;
-                <a href="/">
-                  <span className="text-primary font-bold cursor-pointer">
-                    Sign in
-                  </span>
-                </a>
-              </small>
             </div>
           </div>
         </div>

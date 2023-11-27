@@ -27,7 +27,7 @@ const VerifyStatus = () => {
         try {
           const response = await axios.post(
             "https://olatidejosepha.pythonanywhere.com/api/activate_required/",
-            {},
+            "",
             config
           );
 

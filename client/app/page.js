@@ -10,35 +10,7 @@ function login() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [error, setError] = useState("");
-
-  {
-    /*useEffect(() => {
-    // Fetch CSRF token when the component mounts
-    async function fetchCsrfToken() {
-      try {
-        const response = await axios.get(
-          "https://olatidejosepha.pythonanywhere.com/",
-          {
-            headers: {
-              Authorization: "Authorization",
-            },
-          }
-        );
-        console.log(response);
-
-        setCsrfToken(response.data.refresh_token);
-      } catch (error) {
-        console.error("Error fetching CSRF token:", error);
-        // Handle error accordingly
-        console.log(error);
-      }
-    }
-
-    fetchCsrfToken();
-  }, []); */
-  }
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -76,8 +48,10 @@ function login() {
         // The request was made and the server responded with a status code
 
         console.log("Response data:", error.response.data);
+
         console.log("Status code:", error.response.status);
         console.log("Headers:", error.response.headers);
+        setMessage(error.response.data.message);
       } else if (axios.isCancel(error)) {
         // Handle canceled request
         console.log("Request canceled", error.message);
@@ -93,7 +67,7 @@ function login() {
 
   return (
     <div className="w-full bg-accent h-screen p-6">
-      <div className="flex mx-auto w-3/5 shadow-sm">
+      <div className="flex mx-auto w-full md:w-3/5 shadow-sm">
         <div className="w-full hidden lg:flex">
           <Image
             src="/assets/authImg.png"
@@ -107,14 +81,21 @@ function login() {
           <h2 className="text-primary text-3xl font-clashDisplay leading-10 font-bold">
             INVOICEY
           </h2>
-          <h4 className="text-center font-clashDisplay font-semibold leading-10 text-3xl">
-            Sign In
+          <h4 className="text-center font-clashDisplay font-semibold leading-10 text-3xl pt-20">
+            Log In
           </h4>
           <p className="text-center font-medium leading-7">
-            Let's get you started
+            Log in to continue using Invoicey
           </p>
 
           <div>
+            {message ? (
+              <div className="bg-warning p-4 w-4/5 rounded shadow-md delay-1000 mx-auto duration-300 my-4">
+                {message}
+              </div>
+            ) : (
+              ""
+            )}
             <form className="" id="form" onSubmit={handleSubmit}>
               <div className="mt-2 input-control">
                 <label htmlFor="emailAddress">Email Address</label>
@@ -163,6 +144,11 @@ function login() {
                 </div>
                 <div className="error"></div>
               </div>
+              <a href="/forgotpassword">
+                <p className="text-right text-primary mt-2 font-medium">
+                  Forgot Password?
+                </p>
+              </a>
 
               <div className="my-2">
                 {isLoading ? (
