@@ -329,24 +329,24 @@ def send_trsc_link():
 			}
 		})
 		if link['status']:
-		transaction = Transaction(trsc_id=transaction_ref, status="Pending",
-                            client=client,
-                            invoice=invoice, payout=link['data']['authorization_url'])
-		invoice.trsc_id = transaction.trsc_id
-		db.session.add_all([invoice, transaction])
-		db.session.commit()
-		# send a nonblocking io mail
-		smtnb(f"Invoice Notification for {invoice.inv_id}",
-                    recipients=[client.email],
-                    html=render("mail/pay_invoice.html", invoice=invoice, client=client,
-                                user=auth.current_user(), transaction=transaction))
-		return {
-                    "message": "Mail Sent",
-                				"status": "success",
-                				"ref": transaction.trsc_id,
-                				"inv_id": invoice.inv_id,
-                				"old_ref": old_trsc.trsc_id
-                }
+			transaction = Transaction(trsc_id=transaction_ref, status="Pending",
+								client=client,
+								invoice=invoice, payout=link['data']['authorization_url'])
+			invoice.trsc_id = transaction.trsc_id
+			db.session.add_all([invoice, transaction])
+			db.session.commit()
+			# send a nonblocking io mail
+			smtnb(f"Invoice Notification for {invoice.inv_id}",
+						recipients=[client.email],
+						html=render("mail/pay_invoice.html", invoice=invoice, client=client,
+									user=auth.current_user(), transaction=transaction))
+			return {
+						"message": "Mail Sent",
+						"status": "success",
+						"ref": transaction.trsc_id,
+						"inv_id": invoice.inv_id,
+						"old_ref": old_trsc.trsc_id
+					}
 		return {
 			"message": "Error creating transaction link",
 			"status": "error"
