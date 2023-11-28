@@ -5,7 +5,20 @@ import axios from "axios";
 
 function Verify({ params: { email } }) {
   const [loading, setLoading] = useState(false);
-  const [enable, setEnable] = useState(true);
+  const [enable, setEnable] = useState(false);
+  const [formattedRemainingTime, setFormattedRemainingTime] = useState("");
+
+  // Function to format time as HH:MM:SS
+  function formatTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    const formattedTime = `${String(hours).padStart(2, "0")}:${String(
+      minutes
+    ).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+    return formattedTime;
+  }
 
   useEffect(() => {
     // Check if the code is running on the client side
@@ -13,20 +26,8 @@ function Verify({ params: { email } }) {
       let initialTime = localStorage.getItem("initialTime");
 
       if (!initialTime) {
-        initialTime = 3600;
+        initialTime = 300;
         localStorage.setItem("initialTime", initialTime);
-      }
-
-      // Function to format time as HH:MM:SS
-      function formatTime(seconds) {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const remainingSeconds = seconds % 60;
-
-        const formattedTime = `${String(hours).padStart(2, "0")}:${String(
-          minutes
-        ).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
-        return formattedTime;
       }
 
       // Function to start the countdown
@@ -51,6 +52,8 @@ function Verify({ params: { email } }) {
 
             // Update the remaining time in localStorage
             localStorage.setItem("remainingTime", remainingTime);
+            // Update the formatted time state
+            setFormattedRemainingTime(formatTime(remainingTime));
           }
         }, 1000); // Update every 1 second
       }
@@ -99,11 +102,12 @@ function Verify({ params: { email } }) {
         // Something happened in setting up the request that triggered an Error
         console.log("Error message:", error.message);
       }
-      setIsLoading(false);
+      setLoading(false);
     }
 
-    localStorage.setItem("remainingTime", 3600);
+    localStorage.setItem("remainingTime", 300);
     setEnable(false);
+    setFormattedRemainingTime(formatTime(300)); // Reset the formatted time
   };
 
   return (
@@ -113,8 +117,8 @@ function Verify({ params: { email } }) {
           INVOICEY
         </h1>
       </div>
-      <div className="bg-primary h-full py-auto flex items-center">
-        <div className="bg-accent my-auto mx-auto w-1/2 text-center rounded-2xl">
+      <div className="bg-primary h-full py-auto flex items-center px-4">
+        <div className="bg-accent my-auto mx-auto w-full md:w-3/4 lg:w-1/2 text-center rounded-2xl">
           <Image
             src="/assets/rafiki.png"
             width={242.33}
@@ -129,7 +133,7 @@ function Verify({ params: { email } }) {
             <p className="font-medium text-dark my-4">
               We've sent an email to your{" "}
               <span className="text-primary">{decodeURIComponent(email)}</span>{" "}
-              with a verification link.{" "}
+              with a verification link.
             </p>
             {enable ? (
               <button
@@ -149,11 +153,18 @@ function Verify({ params: { email } }) {
 
             <div className="w-4/5 mx-auto flex justify-between mb-4 mt-2">
               <p className="text-dark text-sm">
-                Link expires in <span className="text-primary">{"4:23"}</span>
+                Link expires in{" "}
+                <span className="text-primary font-semibold">
+                  {formattedRemainingTime}
+                </span>
               </p>
               <p className="text-dark text-sm">
                 incorrect email address?&nbsp;
-                <span className="text-primary">Change email address</span>
+                <a href="/signup">
+                  <span className="text-primary font-semibold">
+                    Change email address
+                  </span>
+                </a>
               </p>
             </div>
           </div>
