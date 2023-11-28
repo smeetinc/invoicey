@@ -317,7 +317,7 @@ def send_trsc_link():
 		all_trsc = [trsc.trsc_id for trsc in Transaction.query.all()]
 		transaction_ref = secrets.token_hex(16)
 		client = old_trsc.client
-		invoice = invoice.client
+		invoice = old_trsc.client
 		while (transaction_ref in all_trsc):
 			transaction_ref = secrets.token_hex(16)
 		link = create_transaction_link({
