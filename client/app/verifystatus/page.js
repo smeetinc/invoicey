@@ -21,7 +21,7 @@ const VerifyStatus = () => {
       if (token) {
         const config = {
           headers: {
-            Authorization: `Bearer ${verifyParam}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "text/html",
           },
         };
@@ -31,7 +31,7 @@ const VerifyStatus = () => {
             "https://olatidejosepha.pythonanywhere.com/api/activate_required/",
             "",
             {
-              Authorization: `Bearer ${verifyParam}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "text/html",
             }
           );
