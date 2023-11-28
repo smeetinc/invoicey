@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { LuArrowUpDown } from "react-icons/lu";
 import "./table.css";
@@ -109,6 +109,7 @@ function overview() {
   let start = (page - 1) * per_page;
   let end = Math.min(start + per_page, Total);
   let paginated_entries = entries.slice(start, end);
+  const [overviewData, setOverviewData] = useState({});
   const route = useRouter();
 
   useEffect(() => {
@@ -129,6 +130,7 @@ function overview() {
           }
         );
         console.log(res.data);
+        setOverviewData(res.data);
       } catch (error) {
         console.log(error.message, error);
       }
@@ -160,15 +162,19 @@ function overview() {
         <div className="grid grid-cols-3 gap-4 mx-auto my-3 px-4">
           <div className="bg-accent text-primary py-10 px-8 rounded-lg text-center">
             <h3>Total No of Invoice Paid</h3>
-            <p className="font-bold text-center">{20}</p>
+            <p className="font-bold text-center">
+              {overviewData?.total_paid || "0"}
+            </p>
           </div>
           <div className="bg-primary text-white py-10 px-8 rounded-lg text-center">
             <h3>No of Overdue payment</h3>
-            <p className="font-bold text-center text-accent">{10}</p>
+            <p className="font-bold text-center text-accent">
+              {overviewData?.total_dued || 0}
+            </p>
           </div>
           <div className="bg-accent text-primary py-10 px-8 rounded-lg text-center">
             <h3>Total Amount Received</h3>
-            <p className="font-bold text-center">&#8358; {"200,800.00"}</p>
+            <p className="font-bold text-center">&#8358; {"0"}</p>
           </div>
         </div>
         <div className="flex justify-between px-4">
