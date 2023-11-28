@@ -53,8 +53,9 @@ const AddInvoiceModal = ({ isOpen, closeModal, getInvoices }) => {
       has_paid: false,
       due_date: `${day}/${month}/${year}`,
       py_type: "Transfer",
+      gender: data.gender === "Male" ? "M" : "F",
     };
-    console.log(mainData);
+
     try {
       setSending(true);
       const res = await axios.post(
@@ -319,6 +320,7 @@ const Invoice = () => {
       <AddInvoiceModal
         isOpen={showAddInvoice}
         closeModal={closeAddInvoiceModal}
+        getInvoices={getInvoices}
       />
       <section className="flex justify-between items-center">
         <h1 className="font-clashDisplay text-dark text-[32px] font-medium tracking-sm mb-9">
@@ -504,11 +506,7 @@ const Invoice = () => {
               </thead>
               <tbody>
                 {invoices.map((invoice, i) => (
-                  <InvoiceRow
-                    color={i % 2 !== 0}
-                    invoice={invoice}
-                    getInvoices={getInvoices}
-                  />
+                  <InvoiceRow color={i % 2 !== 0} invoice={invoice} />
                 ))}
               </tbody>
             </table>
