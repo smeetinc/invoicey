@@ -14,6 +14,7 @@ const AddInvoiceModal = ({ isOpen, closeModal, getAccountDetails }) => {
   const [selectedBankCode, setSelectedBankCode] = useState(null);
   const [accountNumber, setAccountNumber] = useState("");
   const [accountDetails, setAccountDetails] = useState("");
+  const [sending, setSending] = useState(false);
   const resetAndCloseModal = () => {
     formRef.current?.reset();
     closeModal();
@@ -42,6 +43,7 @@ const AddInvoiceModal = ({ isOpen, closeModal, getAccountDetails }) => {
       other: accountDetails?.other_name || "",
     };
     try {
+      setSending(true);
       const token = localStorage.getItem("invc");
       const jsonData = JSON.stringify(data);
       const res = await axios.post(
@@ -59,6 +61,8 @@ const AddInvoiceModal = ({ isOpen, closeModal, getAccountDetails }) => {
       toast.success("Account Added");
     } catch (error) {
       console.log(error);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -111,6 +115,11 @@ const AddInvoiceModal = ({ isOpen, closeModal, getAccountDetails }) => {
         aria-hidden="true"
       >
         <Dialog.Panel className="bg-white text-dark p-6 rounded-lg w-[90%] max-w-2xl ">
+          {sending && (
+            <div className="bg-white/50 inset-0 w-full h-full grid place-items-center z-50 absolute">
+              <Loader />
+            </div>
+          )}
           <Dialog.Title className={"flex items-start justify-between mb-5"}>
             <div>
               <div className="p-3 rounded-xl border border-[#E4E7EC] mb-4 w-fit">
@@ -258,7 +267,9 @@ const Profile = () => {
         }
       );
       const { data } = res;
-
+      if (data?.status === "error") {
+        return;
+      }
       setAccountDetails(data);
     } catch (error) {
       console.log(error.message);
