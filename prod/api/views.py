@@ -185,6 +185,7 @@ class InvoiceDataAPIView(MethodView):
 					transaction = Transaction(trsc_id=transaction_ref, status="Pending",
 								client=client,
 								invoice=invoice, payout=link['data']['authorization_url'])
+					invoice.trsc_id = transaction.trsc_id
 					db.session.add_all([invoice, transaction])
 					db.session.commit()
 					#send a nonblocking io mail

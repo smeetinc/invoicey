@@ -1,27 +1,29 @@
 from werkzeug.security import generate_password_hash
 from flask import (jsonify, make_response, url_for, request,
-				   current_app, render_template as render, abort)
+                   current_app, render_template as render, abort)
 from users.models import User, Invoice, Client, Business, Transaction
 from utils import smtnb, send_mail_text, send_mail, check_transaction_status, create_transaction_link
 from main import db, auth
 from .views import (ClientDataAPIView, MultipleClientDataAPIView,
-					BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
+                    BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
 from . import api
 import jwt
 import secrets
 import datetime
 
 
-
 # class based urls
 api.add_url_rule('/clients/', view_func=ClientDataAPIView.as_view('client'))
 api.add_url_rule('/all-client-data/',
-				 view_func=MultipleClientDataAPIView.as_view('multiple_client'))
+                 view_func=MultipleClientDataAPIView.as_view('multiple_client'))
 api.add_url_rule('/invoice/', view_func=InvoiceDataAPIView.as_view('invoice'))
-api.add_url_rule('/multi/invoice/', view_func=MultipleInvoiceDataAPIView.as_view('multi_invoice'))
+api.add_url_rule('/multi/invoice/<string:client_name>/',
+                 view_func=MultipleInvoiceDataAPIView.as_view('multi_invoice'))
 api.add_url_rule('/bank/', view_func=BankAPIView.as_view('bank_acct'))
 
 # function based view
+
+
 @api.post('/authenticate/')
 def authenticate():
 
@@ -43,13 +45,13 @@ def authenticate():
 		print(user)
 		if user and user.check_hash(password):
 			if not user.is_deleted:
-				#creates refresh token
+				# creates refresh token
 				refresh_token = user.encode_id()
 				auth_message['refresh_token'] = refresh_token
 				auth_message['is_activated'] = user.is_activated
 				auth_message['data'] = bool(json)
 				if user.is_activated:
-					#after token created
+					# after token created
 					auth_message['valid'] = True
 					auth_message['message'] = 'User logged in successfully'
 					auth_message['level'] = 'success'
@@ -64,6 +66,7 @@ def authenticate():
 	auth_message['data'] = bool(json)
 	auth_message['authenticated'] = False
 	return auth_message, 401
+
 
 @api.post('/register-user/')
 def signup():
@@ -85,7 +88,7 @@ def signup():
 			if len(li_name) == 2:
 				first, last = li_name[0], li_name[1]
 				user = User(first_name=first, last_name=last, password=hashed,
-				email=email, name=name)
+                                    email=email, name=name)
 				business = Business(name=busi_nm, merchant=user)
 				db.session.add_all([user, business])
 				db.session.commit()
@@ -104,6 +107,7 @@ def signup():
 		return register_message
 	return register_message
 
+
 @api.post("/users/resend-activation-link/")
 def resend_creation_link():
 	json = request.get_json()
@@ -118,6 +122,7 @@ def resend_creation_link():
 		"message": "If you have an account with us you'll receive and email",
 		"status": "success"
 	}
+
 
 @api.post("/users/activate/<string:token>/")
 def activate_user(token: str):
@@ -153,6 +158,7 @@ def activate_user(token: str):
 			"status": "error"
 		}
 
+
 @api.post('/users/password-reset/')
 def reset_password():
 	json = request.get_json()
@@ -184,6 +190,7 @@ def reset_password():
 		"status": "error",
 		"message": "JSON data not received"
 	}
+
 
 @api.post('/verify_reset/<string:token>/<string:password>/')
 def verify_reset(token: str, password: str):
@@ -220,7 +227,6 @@ def verify_reset(token: str, password: str):
 		abort(401, "Error outside of expected token")
 
 
-		
 @api.get('/overview-data/')
 @auth.login_required
 def overview():
@@ -243,13 +249,14 @@ def overview():
 	}
 	return data
 
+
 @api.get("/invoices-data/")
 @auth.login_required
 def invoices():
 	per_page = current_app.config.get('PER_PAGE', 3)
 	page = request.args.get('page', type=int)
 	pinvoices = Invoice.query.order_by(Invoice.has_paid.asc()).\
-				paginate(page=page, per_page=per_page)
+            paginate(page=page, per_page=per_page)
 	invoices = pinvoices.items
 	total = 0
 	data = {
@@ -272,6 +279,7 @@ def invoices():
 	data['total'] = len(data['invoices'])
 	return data
 
+
 @api.post("/activate_required/")
 @auth.login_required
 def activate_required():
@@ -283,6 +291,7 @@ def activate_required():
 		"message": "User Account Activated",
 		"status": "success",
 	}
+
 
 @api.get("/get-user-data/")
 @auth.login_required
@@ -296,6 +305,7 @@ def get_user_data():
 		"business_name": user.business.name
 	}
 	return data
+
 
 @api.post("/send-trsc-link/")
 @auth.login_required
@@ -319,24 +329,24 @@ def send_trsc_link():
 			}
 		})
 		if link['status']:
-			transaction = Transaction(trsc_id=transaction_ref, status="Pending",
-						client=client,
-						invoice=invoice, payout=link['data']['authorization_url'])
-			invoice.trsc_id = transaction.trsc_id
-			db.session.add_all([invoice, transaction])
-			db.session.commit()
-			#send a nonblocking io mail
-			smtnb(f"Invoice Notification for {invoice.inv_id}",
-				recipients=[client.email],
-				html=render("mail/pay_invoice.html", invoice=invoice, client=client,
-				user=auth.current_user(), transaction=transaction))
-			return {
-				"message": "Mail Sent",
-				"status": "success",
-				"ref": transaction.trsc_id,
-				"inv_id": invoice.inv_id,
-				"old_ref": old_trsc.trsc_id
-			}
+		transaction = Transaction(trsc_id=transaction_ref, status="Pending",
+                            client=client,
+                            invoice=invoice, payout=link['data']['authorization_url'])
+		invoice.trsc_id = transaction.trsc_id
+		db.session.add_all([invoice, transaction])
+		db.session.commit()
+		# send a nonblocking io mail
+		smtnb(f"Invoice Notification for {invoice.inv_id}",
+                    recipients=[client.email],
+                    html=render("mail/pay_invoice.html", invoice=invoice, client=client,
+                                user=auth.current_user(), transaction=transaction))
+		return {
+                    "message": "Mail Sent",
+                				"status": "success",
+                				"ref": transaction.trsc_id,
+                				"inv_id": invoice.inv_id,
+                				"old_ref": old_trsc.trsc_id
+                }
 		return {
 			"message": "Error creating transaction link",
 			"status": "error"
@@ -366,13 +376,14 @@ def update_transaction():
 				"pay_stats": trsc.status,
 			}
 		return {
-				"status": "network error",
-				"pay_stats": "error",
+                    "status": "network error",
+                				"pay_stats": "error",
                 }
 	return {
 		"status": "reference not found",
 		"pay_stats": "error"
 	}
+
 
 @api.get("/trsc-inv-by-ref/")
 @auth.login_required
@@ -383,15 +394,15 @@ def inv_trsc():
 	if trsc and trsc.client in current_user.clients:
 		invoice = trsc.invoice
 		return {
-            'trsc_id': invoice.trsc_id,
-			'client_name': invoice.client.name,
-            'type': invoice.payment_type,
-			'ref_id': invoice.ref_id,
-			'inv_id': invoice.inv_id,
-			'amt': invoice.amount,
-			'has_paid': invoice.has_paid,
-			'py_type': invoice.payment_type,
-        }
+                    'trsc_id': invoice.trsc_id,
+                    'client_name': invoice.client.name,
+                    'type': invoice.payment_type,
+                 			'ref_id': invoice.ref_id,
+                 			'inv_id': invoice.inv_id,
+                 			'amt': invoice.amount,
+                 			'has_paid': invoice.has_paid,
+                 			'py_type': invoice.payment_type,
+                }
 	return {
 		"message": "Either an invoice with that ref is not found, or transaction client is not you",
 		"status": "error"
@@ -404,12 +415,14 @@ def inv_trsc():
 # 		"code": e.code,
 # 	}, 500
 
+
 @api.app_errorhandler(404)
 def not_found(e):
 	return {
 		"message": e.name,
 		"code": e.code,
 	}, 404
+
 
 @api.app_errorhandler(403)
 def forbidden(e):
@@ -418,6 +431,7 @@ def forbidden(e):
 		"code": e.code,
 	}, 403
 
+
 @api.app_errorhandler(401)
 def unauthorized(e):
 	return {
@@ -425,6 +439,7 @@ def unauthorized(e):
 		"code": e.code,
 		"description": e.description,
 	}, 401
+
 
 @api.app_errorhandler(502)
 def bad_gateway(e):

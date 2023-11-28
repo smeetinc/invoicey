@@ -222,7 +222,7 @@ class MultipleInvoiceDataAPIView(View):
 	decorators = [auth.login_required]
 
 	def dispatch_request(self, client_name):
-		client = Client.query.filter_by("name").first()
+		client = Client.query.filter_by(name=client_name).first()
 		if client and not client.is_deleted:
 			invoices = [
 						{
@@ -233,10 +233,10 @@ class MultipleInvoiceDataAPIView(View):
 							"has_paid": invoice.has_paid,
 							"payment_type": invoice.payment_type,
 							"due_date": invoice.due_date.strftime("%d/%m/%Y"),
-							"created_on": invoice.created_on,
+							"created_on": invoice.created_on.strftime("%d/%m/%Y"),
 						} for invoice in client.invoices if not invoice.is_deleted
 					]
-			return invoices
+			return {"invoices":invoices}
 		return {
 			"message": "clients not found",
 			"status": "error",

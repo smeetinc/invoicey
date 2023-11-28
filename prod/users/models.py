@@ -94,7 +94,7 @@ class Client(db.Model, BaseMixin):
 class Invoice(db.Model, BaseMixin):
     __tablename__ = "invoices"
     ref_id = db.Column(db.Text, unique=True)
-    trsc_id = db.Column(db.Integer, unique=True)
+    trsc_id = db.Column(db.Text, unique=True)
     inv_id = db.Column(db.Text, unique=True)
     product = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)

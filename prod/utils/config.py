@@ -11,7 +11,7 @@ class Config:
     PER_PAGE = 10
 
 class DevelopmentConfig(Config):
-    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_SERVER = 'smtp.gmail.com'
     MAIL_USERNAME = os.environ.get('EMAIL')
     MAIL_PASSWORD = os.environ.get('e_pass')
 

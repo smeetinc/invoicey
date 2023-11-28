@@ -878,7 +878,7 @@
 				}
 			]
 		},
-		"/api/multi/invoices/": {
+		"/api/multi/invoice/": {
 			"get":{
 				"parameters": [
 					{
@@ -891,7 +891,7 @@
 						"name":"Authorization",
 						"in":"header",
 						"required":true,
-						"type": "integer"
+						"type": "string"
 					}
 				],
 				"description": "Get all clients based on current authenticated user",
