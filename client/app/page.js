@@ -13,7 +13,6 @@ function login() {
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const [error, setError] = useState("");
   const route = useRouter();
@@ -67,7 +66,7 @@ function login() {
 
         console.log("Status code:", error.response.status);
         console.log("Headers:", error.response.headers);
-        setMessage(error.response.data.message);
+        toast.error(error.response.data.message);
       } else if (axios.isCancel(error)) {
         // Handle canceled request
         console.log("Request canceled", error.message);
@@ -105,13 +104,6 @@ function login() {
           </p>
 
           <div>
-            {message ? (
-              <div className="bg-warning p-4 w-4/5 rounded shadow-md delay-1000 mx-auto duration-300 my-4">
-                {message}
-              </div>
-            ) : (
-              ""
-            )}
             <form className="" id="form" onSubmit={handleSubmit}>
               <div className="mt-2 input-control">
                 <label htmlFor="emailAddress">Email Address</label>

@@ -6,6 +6,7 @@ import { TbEyeSearch } from "react-icons/tb";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { withOutAuth } from "@/utils/withoutAuth";
+import toast from "react-hot-toast";
 
 function signup() {
   const [fullName, setFullName] = useState("");
@@ -90,7 +91,16 @@ function signup() {
       //const responseData = await response.json();
 
       console.log("Response from server:", response.data);
-      window.location.href = "/verify"; // Redirect to a success page or handle accordingly
+      if ((response.data.message = "User already exists")) {
+        toast.error(response.data.message);
+        setIsLoading(false);
+        return;
+      } else {
+        toast.success(
+          "Account created successfully, check your email to verify yourself"
+        );
+        window.location.href = `/verify/${email}`; // Redirect to a success page or handle accordingly
+      }
     } catch (error) {
       console.log("Error posting data:", error);
       if (error.response) {
