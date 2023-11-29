@@ -98,7 +98,7 @@ export default function DashboardLayout({ children }) {
             </li>
             <li className={`${poppins.variable} mt-80`}>
               <Link
-                href={"/logout"}
+                href={"/"}
                 className={
                   active === "/logout"
                     ? "font-poppins text-secondary text-base font-semibold flex gap-[14.62px] items-center"
