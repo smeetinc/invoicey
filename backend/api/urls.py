@@ -1,11 +1,13 @@
 from werkzeug.security import generate_password_hash
 from flask import (jsonify, make_response, url_for, request,
                    current_app, render_template as render, abort)
-from users.models import User, Invoice, Client, Business, Transaction
-from utils import smtnb, send_mail_text, send_mail, check_transaction_status, create_transaction_link
+from users import User, Invoice, Client, Business, Transaction
+from utils import (smtnb, send_mail_text, send_mail,
+				    check_transaction_status, create_transaction_link)
 from main import db, auth
 from .views import (ClientDataAPIView, MultipleClientDataAPIView,
-                    BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView)
+                    BankAPIView, InvoiceDataAPIView, MultipleInvoiceDataAPIView,
+					QueryTrscByInvView)
 from . import api
 import jwt
 import secrets
@@ -20,13 +22,16 @@ api.add_url_rule('/invoice/', view_func=InvoiceDataAPIView.as_view('invoice'))
 api.add_url_rule('/multi/invoice/<string:client_name>/',
                  view_func=MultipleInvoiceDataAPIView.as_view('multi_invoice'))
 api.add_url_rule('/bank/', view_func=BankAPIView.as_view('bank_acct'))
+api.add_url_rule('/all-inv-trsc/', view_func=QueryTrscByInvView.as_view('inv_trsc_all'))
 
 # function based view
 
 
 @api.post('/authenticate/')
 def authenticate():
-
+	"""\
+		The user authentication endpoint.
+	"""
 	json = request.get_json()
 	auth_message = {
 		"valid": False,
@@ -70,6 +75,9 @@ def authenticate():
 
 @api.post('/register-user/')
 def signup():
+	"""\
+		The user registration endpoint
+	"""
 	json = request.get_json()
 	register_message = {
 		'created': False,
@@ -110,6 +118,9 @@ def signup():
 
 @api.post("/users/resend-activation-link/")
 def resend_creation_link():
+	"""\
+		an endpoint that resends activation/creation link
+	"""
 	json = request.get_json()
 	email = json.get('email')
 	user = User.query.filter_by(email=email).first()
@@ -126,6 +137,10 @@ def resend_creation_link():
 
 @api.post("/users/activate/<string:token>/")
 def activate_user(token: str):
+	"""\
+		an endpoint that activates user based on the token
+		passed on by path.
+	"""
 	try:
 		token = User.decode_jwt_token(token)
 		_id = token.get("id")
@@ -161,6 +176,10 @@ def activate_user(token: str):
 
 @api.post('/users/password-reset/')
 def reset_password():
+	"""\
+		an endpoint that sends a password reset
+		message to the user
+	"""
 	json = request.get_json()
 	if json:
 		email = json.get("email")
@@ -194,6 +213,10 @@ def reset_password():
 
 @api.post('/verify_reset/<string:token>/<string:password>/')
 def verify_reset(token: str, password: str):
+	"""\
+		An endpoint that verifies password reset
+		and changes it to the user password
+	"""
 	message = {
 		"message": "User Password Changed",
 		"status": "error",
@@ -230,6 +253,9 @@ def verify_reset(token: str, password: str):
 @api.get('/overview-data/')
 @auth.login_required
 def overview():
+	"""\
+		Gets the dashboard data overview data
+	"""
 	invoices = auth.current_user().business.invoices
 	total_invoices = len(invoices)
 	total_dued = 0
@@ -253,12 +279,14 @@ def overview():
 @api.get("/invoices-data/")
 @auth.login_required
 def invoices():
+	"""\
+		Returns a paginated list of invoice
+	"""
 	per_page = current_app.config.get('PER_PAGE', 3)
 	page = request.args.get('page', type=int)
 	pinvoices = Invoice.query.order_by(Invoice.has_paid.asc()).\
             paginate(page=page, per_page=per_page)
 	invoices = pinvoices.items
-	total = 0
 	data = {
 		"invoices": [
 			{
@@ -283,6 +311,10 @@ def invoices():
 @api.post("/activate_required/")
 @auth.login_required
 def activate_required():
+	"""\
+		A function view that activates the user based on the passed
+		on the header
+	"""
 	user = auth.current_user()
 	user.is_activated = True
 	db.session.add(user)
@@ -296,6 +328,9 @@ def activate_required():
 @api.get("/get-user-data/")
 @auth.login_required
 def get_user_data():
+	"""\
+		Get the current authenticated user data
+	"""
 	user = auth.current_user()
 	data = {
 		"name": user.name,
@@ -310,6 +345,9 @@ def get_user_data():
 @api.post("/send-trsc-link/")
 @auth.login_required
 def send_trsc_link():
+	"""\
+		Resends transaction link to client email
+	"""
 	json = request.get_json()
 	ref = json['trsc_id']
 	old_trsc = Transaction.query.filter_by(trsc_id=ref).first()
@@ -341,12 +379,12 @@ def send_trsc_link():
 						html=render("mail/pay_invoice.html", invoice=invoice, client=client,
 									user=auth.current_user(), transaction=transaction))
 			return {
-						"message": "Mail Sent",
-						"status": "success",
-						"ref": transaction.trsc_id,
-						"inv_id": invoice.inv_id,
-						"old_ref": old_trsc.trsc_id
-					}
+                    "message": "Mail Sent",
+					"status": "success",
+					"ref": transaction.trsc_id,
+					"inv_id": invoice.inv_id,
+					"old_ref": old_trsc.trsc_id
+            }
 		return {
 			"message": "Error creating transaction link",
 			"status": "error"
@@ -360,15 +398,21 @@ def send_trsc_link():
 @api.get("/update-transaction-status/")
 @auth.login_required
 def update_transaction():
+	"""\
+		Updates the transaction status of an invoice
+	"""
 	merchants_clients = auth.current_user().clients
 	ref = request.args.get("trsc_ref")
 	trsc = Transaction.query.filter_by(trsc_id=ref).first()
-	if trsc.client in merchants_clients:
+	if (trsc.client in merchants_clients) and (not trsc.client.is_deleted):
 		trsc_status = check_transaction_status(ref)
 		if trsc_status['status']:
 			trsc.status = trsc_status['data']['status']
 			invoice = trsc.invoice
 			invoice.has_paid = True
+			user_email = invoice.client.user.email
+			mail_subject = f"Client {invoice.client.name} Paid {invoice.amount}"
+			smtnb(mail_subject, recipients=[user_email], html="")
 			db.session.add_all([invoice, trsc])
 			db.session.commit()
 			return {
@@ -377,7 +421,7 @@ def update_transaction():
 			}
 		return {
                     "status": "network error",
-                				"pay_stats": "error",
+					"pay_stats": "error",
                 }
 	return {
 		"status": "reference not found",
@@ -387,7 +431,10 @@ def update_transaction():
 
 @api.get("/trsc-inv-by-ref/")
 @auth.login_required
-def inv_trsc():
+def trsc_inv():
+	"""\
+		Returns all the transactions invoice
+	"""
 	ref = request.args.get('ref')
 	trsc = Transaction.query.filter_by(trsc_id=ref).first()
 	current_user = auth.current_user()
@@ -397,23 +444,23 @@ def inv_trsc():
                     'trsc_id': invoice.trsc_id,
                     'client_name': invoice.client.name,
                     'type': invoice.payment_type,
-                 			'ref_id': invoice.ref_id,
-                 			'inv_id': invoice.inv_id,
-                 			'amt': invoice.amount,
-                 			'has_paid': invoice.has_paid,
-                 			'py_type': invoice.payment_type,
+					'ref_id': invoice.ref_id,
+					'inv_id': invoice.inv_id,
+					'amt': invoice.amount,
+					'has_paid': invoice.has_paid,
+					'py_type': invoice.payment_type,
                 }
 	return {
 		"message": "Either an invoice with that ref is not found, or transaction client is not you",
 		"status": "error"
 	}
 
-# @api.app_errorhandler(500)
-# def internal_error(e):
-# 	return {
-# 		"message": e.name,
-# 		"code": e.code,
-# 	}, 500
+@api.app_errorhandler(500)
+def internal_error(e):
+	return {
+		"message": e.name,
+		"code": e.code,
+	}, 500
 
 
 @api.app_errorhandler(404)

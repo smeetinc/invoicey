@@ -1,6 +1,6 @@
 from flask.views import MethodView, View
-from flask import request, current_app, url_for, request, render_template as render
-from users.models import Client, User, Invoice, MerchantBankAccount,  Transaction
+from flask import request, current_app, typing as ft, url_for, request, render_template as render
+from users import Client, User, Invoice, MerchantBankAccount,  Transaction
 from utils import smtnb, create_sub_account, create_transaction_link
 from main import auth, db
 import datetime
@@ -318,3 +318,27 @@ class BankAPIView(MethodView):
 		pass
 	def delete(self):
 		pass
+
+class QueryTrscByInvView(View):
+	init_every_request = True
+	decorators = [auth.login_required]
+	def dispatch_request(self):
+		inv_id = request.args.get("inv_id")
+		page = request.args.get("page", int)
+		invoice = Invoice.query.filter_by(inv_id=inv_id).first()
+		if invoice and not invoice.is_deleted:
+			transactions = Transaction.query.\
+				paginate(per_page=current_app.config['PER_PAGE'],
+											 page=page)
+			trscs = [
+				{
+					"trsc_id": trsc.trsc_id,
+					"payout": trsc.payout,
+					"status": trsc.status
+				} for trsc in transactions.items if not trsc.is_deleted
+			]
+			return trscs
+		return {
+			"message": "No invoice with that id",
+			"status": "error"
+		}

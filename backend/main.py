@@ -66,12 +66,12 @@ app = create_app()
 
 mail = mail
 
-from users.models import User
+from users import (User, Client, Invoice, Business, Transaction, MerchantBankAccount, Banks)
 
 @auth.verify_token
 def verify_token(token: str):
     """
-        An function that validates auth token
+        A function that validates auth token
     """
     try:
         token = User.decode_jwt_token(token) if token else None
