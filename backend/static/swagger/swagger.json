@@ -1046,6 +1046,40 @@
 					}
 				}
 			}
+		},
+		"/trsc-inv-by-ref/": {
+			"get": {
+				"summary": "Gets the transaction invoice by using the ref query",
+				"parameters": [
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true
+					},
+					{
+						"name": "ref",
+						"in": "query",
+						"required": true
+					}
+				],
+				"tags": [
+					"Payments"
+				],
+				"responses":{
+					"200":{
+						"description": "OK",
+						"content":[
+							"application/json"
+						]
+					},
+					"401":{
+						"description": "Unauthorized",
+						"content": [
+							"application/json"
+						]
+					}
+				}
+			}
 		}
 	}
 }
