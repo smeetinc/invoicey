@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash
 from flask import (jsonify, make_response, url_for, request,
                    current_app, render_template as render, abort)
-from users.models import User, Invoice, Client, Business, Transaction
+from users import User, Invoice, Client, Business, Transaction
 from utils import (smtnb, send_mail_text, send_mail,
 				    check_transaction_status, create_transaction_link)
 from main import db, auth
@@ -404,7 +404,7 @@ def update_transaction():
 	merchants_clients = auth.current_user().clients
 	ref = request.args.get("trsc_ref")
 	trsc = Transaction.query.filter_by(trsc_id=ref).first()
-	if trsc.client in merchants_clients:
+	if (trsc.client in merchants_clients) and (not trsc.client.is_deleted):
 		trsc_status = check_transaction_status(ref)
 		if trsc_status['status']:
 			trsc.status = trsc_status['data']['status']

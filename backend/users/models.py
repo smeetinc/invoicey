@@ -150,4 +150,3 @@ class Banks(db.Model, BaseMixin):
         db.session.add_all(unused)
         db.session.commit()
         return True
-        from urllib import request

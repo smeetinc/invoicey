@@ -1,6 +1,6 @@
 from flask.views import MethodView, View
 from flask import request, current_app, typing as ft, url_for, request, render_template as render
-from users.models import Client, User, Invoice, MerchantBankAccount,  Transaction
+from users import Client, User, Invoice, MerchantBankAccount,  Transaction
 from utils import smtnb, create_sub_account, create_transaction_link
 from main import auth, db
 import datetime

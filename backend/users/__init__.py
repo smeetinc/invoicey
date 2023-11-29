@@ -2,4 +2,4 @@ from flask import Blueprint
 
 users = Blueprint("users", __name__)
 
-from . import models
+from .models import (User, Client, Business, Invoice, Transaction, MerchantBankAccount, Banks)
