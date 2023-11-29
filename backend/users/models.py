@@ -66,9 +66,10 @@ class User(db.Model, BaseMixin):
         decoded = jwt.decode(val, current_app.config['SECRET_KEY'], algorithms="HS256")
         return decoded
 
-    def encode_id(self):
-        amt = datetime.timedelta(hours=24)
-        encoded = self.create_jwt_token(**{"id": self._id, "exp": datetime.datetime.utcnow() + amt})
+    def encode_id(self,
+                  exp: datetime.datetime = datetime.datetime.utcnow() +\
+                    datetime.timedelta(hours=24)) -> str:
+        encoded = self.create_jwt_token(**{"id": self._id, "exp": exp})
         return encoded
 
 

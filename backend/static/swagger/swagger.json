@@ -977,6 +977,9 @@
 		"/update-transaction-status/": {
 			"get": {
 				"description": "Gets the transaction status",
+				"tags":[
+					"Payments"
+				],
 				"parameters": [
 					{
 						"name": "Authorization",
@@ -988,9 +991,6 @@
 						"in": "query",
 						"required": true
 					}
-				],
-				"tags": [
-					"Payments"
 				],
 				"responses": {
 					"200": {	
