@@ -17,7 +17,7 @@ ALLOWED_ORGINS = [
     "http://localhost:5000/",
     "http://olatidejosepha.pythonanywhere.com/"
     "https://invoicey-one.vercel.app",
-    "https://olatidejosepha.pythonanywhere.com/"
+    "https://olatidejosepha.pythonanywhere.com"
 ]
 
 

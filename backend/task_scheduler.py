@@ -10,15 +10,15 @@ from datetime import datetime, time
 import threading
 
 
-# push the app local context to this outside scheduler
-ctx = app.app_context()
-ctx.push()
 
-# query all the client stored in the database
-clients = Client.query.all()
 
 # A function that sends multiple emails to client that has overdued invoices
 def multiple_dued_invoice_emailer():
+    # push the app local context to this outside scheduler
+    ctx = app.app_context()
+    ctx.push()
+    # query all the client stored in the database
+    clients = Client.query.all()
     with mail.connect() as conn:
         for client in clients:
             if not client.is_deleted:
