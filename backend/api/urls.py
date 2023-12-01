@@ -406,7 +406,8 @@ def update_transaction():
 	trsc = Transaction.query.filter_by(trsc_id=ref).first()
 	if (trsc.client in merchants_clients) and (not trsc.client.is_deleted):
 		trsc_status = check_transaction_status(ref)
-		if trsc_status['status']:
+		data_status = trsc_status['data']['status']
+		if trsc_status['status'] and data_status == 'success':
 			trsc.status = trsc_status['data']['status']
 			invoice = trsc.invoice
 			invoice.has_paid = True
@@ -421,7 +422,7 @@ def update_transaction():
 			}
 		return {
                     "status": "network error",
-					"pay_stats": "error",
+					"pay_stats": data_status,
                 }
 	return {
 		"status": "reference not found",

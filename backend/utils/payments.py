@@ -39,6 +39,6 @@ def create_transaction_link(params):
 
 def check_transaction_status(ref):
 	resp = resp = requests.get(
-            f"https://api.paystack.co/transaction/{ref}/", headers=headers)
+            f"https://api.paystack.co/transaction/verify/{ref}/", headers=headers)
 	resp_json = resp.json()
 	return resp_json
