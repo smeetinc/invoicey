@@ -29,8 +29,9 @@ const AddClientModal = ({ isOpen, closeModal, getClients }) => {
         email: data.email,
         birth_date: `${day}/${month}/${year}`,
         phone: data.phoneNumber,
-        gender: data.gender === "Male" ? "M" : "F",
+        gender: data.gender === "male" ? "M" : "F",
       };
+
       try {
         setSending(true);
         const res = await axios.post(

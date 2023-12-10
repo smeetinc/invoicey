@@ -193,7 +193,7 @@ const EditModal = ({ isOpen, closeModal }) => {
     </Dialog>
   );
 };
-const InvoiceRow = ({ color }) => {
+const InvoiceRow = ({ color, invoice }) => {
   const [showActions, setShowActions] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const actionRef = useRef(null);
@@ -212,6 +212,11 @@ const InvoiceRow = ({ color }) => {
   const closeEditModal = () => {
     setShowEditModal(false);
   };
+  const formatNum = (num) => {
+    return Intl.NumberFormat("en-US", {
+      currency: "NGN",
+    }).format(num);
+  };
   return (
     <tr
       className={`border-collapse border border-grey ${
@@ -220,7 +225,7 @@ const InvoiceRow = ({ color }) => {
     >
       <td>
         <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] mr-10 py-4 pl-4 text-center">
-          <span>IN01</span>
+          <span>IN{invoice?.inv_id.slice(0, 2)}</span>
         </div>
       </td>
       <td>
@@ -234,19 +239,19 @@ const InvoiceRow = ({ color }) => {
         </div>
       </td>
       <td>
-        <div className="flex justify-center  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px]  py-4 text-center ">
-          <span>Pre-wedding Photoshoot</span>
+        <div className="flex justify-center whitespace-nowrap max-w-sm ml-0 overflow-hidden text-ellipsis  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px]  py-4 text-center ">
+          <span>{invoice?.description}</span>
         </div>
       </td>
       <td>
         <div className="   items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px] text-center  py-4 ">
-          <span>₦35,000.00</span>
+          <span>₦{formatNum(invoice?.amt)}</span>
         </div>
       </td>
       <td>
         <div className="  items-center gap-2 text-dark font-normal text-sm  tracking-[0.28px]  py-4 text-center ">
           <span className="  py-2 w-fit px-4 mx-4 rounded-3xl bg-primary text-secondary ">
-            Pending
+            {invoice?.has_paid ? "Paid" : "Pending"}
           </span>
         </div>
       </td>
