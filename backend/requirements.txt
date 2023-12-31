@@ -13,3 +13,4 @@ PyJWT=l
 python-engineio
 python-socketio
 requests
+gunicorn
