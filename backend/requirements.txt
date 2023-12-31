@@ -9,7 +9,7 @@ Flask-SocketIO
 Flask-SQLAlchemy
 flask-swagger-ui
 Flask-WTF
-PyJWT=l
+PyJWT
 python-engineio
 python-socketio
 requests
